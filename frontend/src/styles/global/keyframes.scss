@@ -1,0 +1,41 @@
+// Keyframes
+// Keep keyframes in one place (not in local-scoped components)
+
+.animate-spin {
+	animation: spin 1.4s linear infinite;
+}
+
+// dash
+@keyframes dash {
+	0% {
+		stroke-dashoffset: 187;
+	}
+	50% {
+		stroke-dashoffset: 46.75;
+		transform: rotate(135deg);
+	}
+	100% {
+		stroke-dashoffset: 187;
+		transform: rotate(450deg);
+	}
+}
+
+// rotator: Rotates 270deg
+@keyframes rotator {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(270deg);
+	}
+}
+
+// spin: Rotates 360deg
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}

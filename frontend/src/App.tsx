@@ -1,41 +1,18 @@
-import { useState } from 'react';
-import logo from './assets/images/logo-universal.png';
-import './App.css';
-import { Greet } from '../wailsjs/go/main/App';
+import { Routes, Route } from "react-router-dom";
+
+import { Home, NotFound } from "pages";
 
 function App() {
-    const [resultText, setResultText] = useState(
-        'Please enter your name below 👇'
-    );
-    const [name, setName] = useState('');
-    const updateName = (e: any) => setName(e.target.value);
-    const updateResultText = (result: string) => setResultText(result);
+	return (
+		<div className="App">
+			<Routes>
+				<Route path="/" element={<Home />} />
 
-    function greet() {
-        Greet(name).then(updateResultText);
-    }
-
-    return (
-        <div id="App">
-            <img src={logo} id="logo" alt="logo" draggable={false} />
-            <div id="result" className="result">
-                {resultText}
-            </div>
-            <div id="input" className="input-box">
-                <input
-                    id="name"
-                    className="input"
-                    onChange={updateName}
-                    autoComplete="off"
-                    name="input"
-                    type="text"
-                />
-                <button className="btn" onClick={greet}>
-                    Greet
-                </button>
-            </div>
-        </div>
-    );
+				{/* 404 */}
+				<Route path="*" element={<NotFound />} />
+			</Routes>
+		</div>
+	);
 }
 
 export default App;

@@ -1,0 +1,92 @@
+@use "sass:math";
+
+//
+// Flex
+//
+
+.flex {
+	display: flex;
+	flex-wrap: nowrap;
+	flex-direction: column;
+
+	&.row {
+		flex-direction: row;
+	}
+
+	&.wrap {
+		flex-wrap: wrap;
+	}
+
+	&.grow {
+		flex-grow: 1;
+	}
+
+	&.shrink {
+		flex-shrink: 1;
+	}
+
+	&.v-center {
+		align-items: center;
+	}
+
+	&.h-center {
+		justify-content: center;
+	}
+
+	&.center {
+		align-items: center;
+		justify-content: center;
+	}
+}
+
+.flex-center {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+//
+// Stack
+//
+
+@for $i from 1 through 20 {
+	.stack.stack-#{$i} {
+		& > * {
+			margin-top: #{math.div($i, 2)}rem;
+		}
+	}
+}
+
+.stack {
+	display: flex;
+	flex-direction: column;
+
+	& > * {
+		margin-top: 1rem;
+	}
+
+	& > *:first-child {
+		margin-top: 0;
+	}
+}
+
+@for $i from 1 through 20 {
+	.stack-row.stack-#{$i} {
+		& > * {
+			margin-left: #{math.div($i, 2)}rem;
+		}
+	}
+}
+
+.stack-row {
+	display: flex;
+	flex-direction: row;
+
+	& > * {
+		margin-left: 1rem;
+	}
+
+	& > *:first-child {
+		margin-left: 0;
+	}
+}
