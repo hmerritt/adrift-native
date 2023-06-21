@@ -2,7 +2,7 @@
 import { expect } from "vitest";
 import matchers from "@testing-library/jest-dom/matchers";
 
-import { injectGlobalLog } from "utils";
+import globalInit from "global/index";
 
-injectGlobalLog();
+globalInit();
 expect.extend(matchers);

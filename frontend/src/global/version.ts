@@ -4,6 +4,11 @@ export const gitBranch = import.meta.env.VITE_GIT_BRANCH;
 export const gitCommitHash = import.meta.env.VITE_GIT_COMMIT;
 export const environment = import.meta.env.MODE;
 
+/**
+ * Returns version string including app name, version, git branch, and commit hash.
+ *
+ * E.g `App [Version 1.0.0 (development 4122b6...dc7c)]`
+ */
 export const versionString = () => {
 	if (!appVersion) {
 		return `${appName} [Version unknown]`;
@@ -19,8 +24,8 @@ export const versionString = () => {
 			versionString += `${environment ?? "unknown"} `;
 		}
 
-		// Branch name
-		if (gitBranch !== "master") {
+		// Branch name (hide in production)
+		if (gitBranch !== "master" || environment === "development") {
 			versionString += `${gitBranch ?? "unknown"}/`;
 		}
 
@@ -31,8 +36,4 @@ export const versionString = () => {
 	versionString += `]`;
 
 	return versionString;
-};
-
-export const versionLog = () => {
-	log(versionString());
 };

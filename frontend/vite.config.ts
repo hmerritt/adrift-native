@@ -2,8 +2,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { injectManifest } from "rollup-plugin-workbox";
 
-import linaria from "./config/linaria-rollup.js";
+import linaria from "./config/linaria-rollup";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -24,7 +25,15 @@ export default defineConfig({
 		linaria({
 			sourceMap: false,
 			extension: ".scss",
-			preprocessor: "none"
+			preprocessor: "none",
+			exclude: ["src/global/**"]
+		}),
+		injectManifest({
+			mode: "production",
+			swDest: "dist/sw.js",
+			globDirectory: "dist",
+			swSrc: "src/service-worker.ts",
+			maximumFileSizeToCacheInBytes: 6 * 1024 * 1024
 		})
 	],
 	test: {

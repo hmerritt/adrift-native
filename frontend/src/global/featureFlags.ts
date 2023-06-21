@@ -1,3 +1,5 @@
+import { $global } from "./utils";
+
 /**
  * Feature flags
  */
@@ -6,26 +8,11 @@ export const featureFlags = {
 	someOtherFeature: false
 };
 
-type FeatureOptions = {
-	alwaysShowOnDev?: boolean;
-};
-
-const isFalse = (value: unknown): value is false => {
-	return (
-		!value ||
-		value === "0" ||
-		value === "off" ||
-		value === "null" ||
-		value === "false" ||
-		value === "undefined"
-	);
-};
-
 /**
  * Returns `true` if the feature is enabled in `featureFlags` object.
  */
 export const feature = (
-	mode: string,
+	mode: FeatureFlags,
 	options: FeatureOptions = {}
 ): boolean => {
 	const { alwaysShowOnDev } = {
@@ -34,7 +21,11 @@ export const feature = (
 	};
 
 	// Bypass feature flag in dev mode if `alwaysShowOnDev` is true
-	if (alwaysShowOnDev && import.meta.env.MODE === "development") {
+	if (
+		alwaysShowOnDev &&
+		(import.meta.env.MODE === "development" ||
+			import.meta.env.MODE === "test")
+	) {
 		return true;
 	}
 
@@ -50,4 +41,29 @@ export const feature = (
 	}
 
 	return match;
+};
+
+export type FeatureOptions = {
+	alwaysShowOnDev?: boolean;
+};
+
+export type FeatureFlags =
+	| keyof typeof featureFlags
+	| "development"
+	| "testing"
+	| "production";
+
+export const injectFeature = () => {
+	$global.feature = feature;
+};
+
+const isFalse = (value: unknown): value is false => {
+	return (
+		!value ||
+		value === "0" ||
+		value === "off" ||
+		value === "null" ||
+		value === "false" ||
+		value === "undefined"
+	);
 };

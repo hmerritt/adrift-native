@@ -14,7 +14,7 @@ export function useLocalStorage(key: string, initialValue: any) {
 			return item ? parseJSON(item) : initialValue;
 		} catch (error) {
 			// If error also return initialValue
-			debug("error", error);
+			log("error", error);
 			return initialValue;
 		}
 	});
@@ -34,7 +34,7 @@ export function useLocalStorage(key: string, initialValue: any) {
 			window.localStorage.setItem(key, JSON.stringify(valueToStore));
 		} catch (error) {
 			// A more advanced implementation would handle the error case
-			debug("error", error);
+			log("error", error);
 		}
 	};
 

@@ -2,6 +2,7 @@ import { css } from "@linaria/core";
 
 export type GridDndDragBoxProps = {
 	dataItem: any;
+	renderIndex: number;
 	renderWith: (props: any) => JSX.Element;
 };
 
@@ -11,18 +12,19 @@ export type GridDndDragBoxProps = {
  * Renders element in a hidden state. This is to prevent layout issues,
  * such as an incorrect height of the GridDndDragBox.
  */
-export default function GridDndDragBox({
+export const GridDndDragBox = ({
 	dataItem,
+	renderIndex,
 	renderWith
-}: GridDndDragBoxProps) {
+}: GridDndDragBoxProps) => {
 	const RenderWith = renderWith;
 
 	return (
 		<div className={gridDragbox}>
-			<RenderWith {...dataItem} />
+			<RenderWith {...dataItem} renderIndex={renderIndex} />
 		</div>
 	);
-}
+};
 
 const gridDragbox = css`
 	display: table;

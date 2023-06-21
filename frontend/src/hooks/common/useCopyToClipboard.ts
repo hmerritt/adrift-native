@@ -12,7 +12,7 @@ export function useCopyToClipboard(): [CopiedValue, CopyFn] {
 
 	const copy: CopyFn = async (text) => {
 		if (!navigator?.clipboard) {
-			debug("warn", "Clipboard not supported");
+			log("warn", "Clipboard not supported");
 			return false;
 		}
 
@@ -22,7 +22,7 @@ export function useCopyToClipboard(): [CopiedValue, CopyFn] {
 			setCopiedText(text);
 			return true;
 		} catch (error) {
-			debug("warn", "Copy failed", error);
+			log("warn", "Copy failed", error);
 			setCopiedText(null);
 			return false;
 		}

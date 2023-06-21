@@ -1,19 +1,19 @@
+import cx from "classnames";
+import { useState } from "react";
 import { css } from "@linaria/core";
 
 import theme from "styles";
-import { feature } from "utils";
 import { countIncrement } from "store/actions";
 import { useDispatch, useSelector, useInterval } from "hooks";
 
-import { Grid, GridDnd, Icon, Stack } from "components";
-import { useState } from "react";
+import { GridDnd, Icon, Stack } from "components";
 
 export const Home = () => {
 	const dispatch = useDispatch();
 	const count = useSelector((state) => state.count.current);
 
 	const [data, setData] = useState(
-		[...Array(12)].map((e, i) => ({ id: String(i), children: i }))
+		[...Array(12)].map((e, i) => ({ id: String(i) }))
 	);
 
 	useInterval(() => {
@@ -31,43 +31,38 @@ export const Home = () => {
 				</h1>
 				<Icon name="spinner" />
 			</Stack>
-			<Grid
-				center
-				gutter={10}
-				minWidth={20}
-				maxWidth={20}
-				className={grid}
-			>
-				{[...Array(12)].map((e, i) => (
-					<div key={i} className={card} />
-				))}
-			</Grid>
+
 			<GridDnd
 				data={data}
 				setData={setData}
-				renderWith={(props) => <div className={card} {...props} />}
+				renderWith={({ id, renderIndex, ...props }) => (
+					<div className={cx(card, "flex-center")} {...props}>
+						{`${renderIndex} -> ${id}`}
+					</div>
+				)}
 				// grid
 				className={grid}
-				gutter={10}
 				minWidth={20}
 				maxWidth={20}
+				gutter={10}
 				center
 			/>
 		</div>
 	);
 };
 
-// This will get compiled at build time into a css file
+// This will get compiled at build time into a css file.
+// Why? - Performance is *greatly* improved over something like styled-components which compiles at run time!
 const header = css`
-	${theme}
+	${theme} // Import theme object - can now use all SCSS variables and mixins set in styles/theme.ts
 	text-transform: uppercase;
 	font-size: 8rem;
 	font-weight: thin;
-	color: $red-500;
-	/* color: pink; */
+	color: $red-500; // See styles/colors.tsx
 	text-align: center;
-	text-shadow: $shadow-1;
+	text-shadow: $shadow-1; // See styles/shadows.tsx
 
+	// All valid SCSS syntax is valid here (this is just an example)
 	@for $i from 1 through 20 {
 		.stack.stack-#{$i} {
 			& > * {

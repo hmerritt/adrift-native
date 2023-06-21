@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-import GridDndDragBox from "./GridDndDragBox";
+import { GridDndDragBox } from "./GridDndDragBox";
 
 export type GridDndItemProps = {
 	id: string;
@@ -10,12 +10,12 @@ export type GridDndItemProps = {
 	renderWith: (props: any) => JSX.Element;
 };
 
-export default function GridDndItem({
+export const GridDndItem = ({
 	id,
 	dataItem,
 	renderIndex,
 	renderWith
-}: GridDndItemProps) {
+}: GridDndItemProps) => {
 	const RenderWith = renderWith;
 
 	const { active, attributes, listeners, setNodeRef, transform, transition } =
@@ -30,11 +30,14 @@ export default function GridDndItem({
 	return (
 		<div ref={setNodeRef} style={style} {...attributes} {...listeners}>
 			{active?.id === id ? (
-				<GridDndDragBox dataItem={dataItem} renderWith={renderWith} />
+				<GridDndDragBox
+					dataItem={dataItem}
+					renderIndex={renderIndex}
+					renderWith={renderWith}
+				/>
 			) : (
-				<RenderWith {...dataItem} />
-				// renderIndex={renderIndex}
+				<RenderWith {...dataItem} renderIndex={renderIndex} />
 			)}
 		</div>
 	);
-}
+};

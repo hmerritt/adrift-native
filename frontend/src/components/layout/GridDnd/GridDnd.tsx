@@ -19,18 +19,23 @@ import {
 } from "@dnd-kit/sortable";
 
 import { Grid, GridProps } from "components";
-import GridDndItem from "./GridDndItem";
+import { GridDndItem } from "./GridDndItem";
 
-interface Data {
+type Data = {
 	id: string;
 	[key: string]: any;
-}
+};
+
+type RenderWithProps = {
+	renderIndex: number;
+	[key: string]: any;
+};
 
 export type GridDndrops = GridProps & {
 	data: Data[];
 	mouseSensorOptions?: MouseSensorOptions;
 	pointerSensorOptions?: PointerSensorOptions;
-	renderWith: (props: any) => JSX.Element;
+	renderWith: (props: RenderWithProps) => JSX.Element;
 	getProps?: (data: Data, index?: number) => Record<string, unknown>;
 	setData: React.Dispatch<React.SetStateAction<any[]>>;
 	// Custom drag events
@@ -106,6 +111,7 @@ export const GridDnd = ({
 						{...getProps(
 							data?.[data?.findIndex((x) => x.id === activeId)]
 						)}
+						renderIndex={-1}
 					/>
 				) : null}
 			</DragOverlay>
