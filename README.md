@@ -22,7 +22,13 @@ Quickstart by building the app yourself:
 2.  Clone this repo
 3.  Run `$ wails build`
 
-## Advanced
+## Scripts
+
+Develop live with hot-reload:
+
+```
+wails dev
+```
 
 Cross-platform + production build command:
 
@@ -33,7 +39,7 @@ $ wails build -platform "windows/amd64,darwin/universal,linux/amd64" -ldflags "-
 Build windows installer with `nsis`
 
 ```
-$ wails build -ldflags "-s -w" -nsis
+$ wails build -platform "windows/amd64" -ldflags "-s -w" -nsis
 ```
 
 ## Documentation

@@ -4,7 +4,9 @@ import (
 	"embed"
 
 	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/linux"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
@@ -22,7 +24,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:             "go-gui",
+		Title:             "Adrift Native",
 		Width:             1024,
 		Height:            768,
 		MinWidth:          300,
@@ -31,10 +33,19 @@ func main() {
 		Fullscreen:        false,
 		Frameless:         false,
 		StartHidden:       false,
-		HideWindowOnClose: true,
-		// RGBA:              &options.RGBA{255, 255, 255, 255},
-		Assets:    assets,
-		OnStartup: app.startup,
+		HideWindowOnClose: false,
+		// BackgroundColour:  &options.RGBA{R: 255, G: 255, B: 255, A: 255},
+		AssetServer: &assetserver.Options{
+			Assets: assets,
+		},
+		Menu:             nil,
+		Logger:           nil,
+		LogLevel:         logger.DEBUG,
+		OnStartup:        app.startup,
+		OnDomReady:       app.domReady,
+		OnBeforeClose:    app.beforeClose,
+		OnShutdown:       app.shutdown,
+		WindowStartState: options.Normal,
 		Bind: []interface{}{
 			app,
 		},
@@ -47,12 +58,20 @@ func main() {
 			ZoomFactor:           1,
 		},
 		Mac: &mac.Options{
-			TitleBar:             mac.TitleBarHiddenInset(),
-			WebviewIsTransparent: false,
-			WindowIsTranslucent:  false,
+			TitleBar: &mac.TitleBar{
+				TitlebarAppearsTransparent: true,
+				HideTitle:                  false,
+				HideTitleBar:               false,
+				FullSizeContent:            false,
+				UseToolbar:                 false,
+				HideToolbarSeparator:       true,
+			},
+			Appearance:           mac.NSAppearanceNameVibrantLight,
+			WebviewIsTransparent: true,
+			WindowIsTranslucent:  true,
 			About: &mac.AboutInfo{
-				Title:   "Adrift Native Template",
-				Message: "Adrift Native via Wails",
+				Title:   "Adrift Native",
+				Message: "",
 				Icon:    icon,
 			},
 		},
