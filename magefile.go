@@ -9,6 +9,7 @@ import (
 
 func Bootstrap() error {
 	return RunSync([][]string{
+		{"go", "get", "github.com/wailsapp/wails/v2/cmd/wails"},
 		{"go", "get", "github.com/magefile/mage"},
 		{"go", "get", "gotest.tools/gotestsum"},
 		{"go", "generate", "-tags", "tools", "tools/tools.go"},
@@ -20,16 +21,8 @@ func Test() error {
 	return sh.Run("gotestsum", "--format", "pkgname", "--", "--cover", "./...")
 }
 
-func Bench() error {
-	return sh.Run("go", "test", "--cover", "-bench", ".", "-benchmem", "./...")
-}
-
 func Dev() error {
 	return sh.Run("wails", "dev")
-}
-
-func Buildq() error {
-	return sh.Run("wails", "build", "-ldflags", "-s -w")
 }
 
 func Build() error {
@@ -39,7 +32,10 @@ func Build() error {
 		"-platform",
 		"windows/amd64,darwin/universal,linux/amd64",
 		"-ldflags",
-		LdFlagString(),
-		"-nsis"
+		"-s -w",
+		// "-nsis", // Builds a Windows installer
+		// "-upx" // Binary compression
 	)
+
+	// @TODO: Zip the binary for release?
 }
