@@ -16,33 +16,25 @@ Quickstart by building the app yourself:
 
     -   [`go-lang`](https://go.dev/dl/)
     -   [`yarn`](https://yarnpkg.com/getting-started/install)
-    -   [`Wails CLI`](https://wails.io/docs/gettingstarted/installation/#installing-wails) - `$ go install github.com/wailsapp/wails/v2/cmd/wails@latest`
-    -   `$ go mod download`
     -   (Optional) [`nsis` windows installer](https://sourceforge.net/projects/nsis/)
     -   (Optional) [`upx` compress binary](https://upx.github.io/)
 
 2.  Clone this repo
-3.  Run `$ wails build`
+3.  Install dependencies
+    -   `go install github.com/magefile/mage`
+    -   `mage -v bootstrap`
+4.  Build the app with `mage -v build`
 
 ## Scripts
 
-Develop live with hot-reload:
+Scripts are written in Go, and ran using the [mage](https://github.com/magefile/mage) command.
 
-```
-wails dev
-```
+Available scripts (`mage -l` for script list):
 
-Cross-platform + production build command:
-
-```
-$ wails build -platform "windows/amd64,darwin/universal,linux/amd64" -ldflags "-s -w"
-```
-
-Build windows installer with `nsis`
-
-```
-$ wails build -platform "windows/amd64" -ldflags "-s -w" -nsis
-```
+-   `bootstrap` - installs required dependencies (aims to be an all-in-one setup script)
+-   `test` - runs all Go test files
+-   `dev` - starts up dev server with live hot-reloading
+-   `build` - builds production binaries to `bin` directory
 
 ## Documentation
 
