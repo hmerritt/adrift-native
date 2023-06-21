@@ -40,5 +40,6 @@ func Build() error {
 		"windows/amd64,darwin/universal,linux/amd64",
 		"-ldflags",
 		LdFlagString(),
+		"-nsis"
 	)
 }
