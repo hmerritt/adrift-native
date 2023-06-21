@@ -4,7 +4,9 @@
 
 Adrift Native can run your apps _natively_ as a Windows and Mac app (outside the browser as a standalone app).
 
-Initial binary size (for Windows) is less-than 10MB, and as low as **3MB** when compressed with upx.
+Initial binary size (for Windows) is less-than 10MB, and as low as **3MB** when compressed with [upx](https://upx.github.io/).
+
+![](https://imgur.com/b1IxXg9.gif)
 
 ## Getting started
 
