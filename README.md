@@ -4,23 +4,51 @@
 
 Adrift Native can run your apps _natively_ as a Windows and Mac app (outside the browser as a standalone app).
 
-Initial binary size (for Windows) is less-than **10MB**!
+Initial binary size (for Windows) is less-than 10MB, and as low as **3MB** when compressed with upx.
 
 ## Getting started
 
 Quickstart by building the app yourself:
 
-1. Clone this repo
-2. `cd frontend`
-3. `yarn install` (or `npm install`)
-4. `yarn build` (or `npm run build`)
-5. `cd ..`
-6. `wails build`
+1.  Install Wails dependencies ([detailed instructions here](https://wails.io/docs/gettingstarted/installation))
 
-[Detailed build instructions here](build/README.md)
+    -   [`go-lang`](https://go.dev/dl/)
+    -   [`yarn`](https://yarnpkg.com/getting-started/install)
+    -   [`Wails CLI`](https://wails.io/docs/gettingstarted/installation/#installing-wails) - `$ go install github.com/wailsapp/wails/v2/cmd/wails@latest`
+    -   `$ go mod download`
+    -   (Optional) [`nsis` windows installer](https://sourceforge.net/projects/nsis/)
+    -   (Optional) [`upx` compress binary](https://upx.github.io/)
+
+2.  Clone this repo
+3.  Run `$ wails build`
+
+## Advanced
+
+Cross-platform + production build command:
+
+```
+$ wails build -platform "windows/amd64,darwin/universal,linux/amd64" -ldflags "-s -w"
+```
+
+Build windows installer with `nsis`
+
+```
+$ wails build -ldflags "-s -w" -nsis
+```
+
+## Documentation
+
+-   [wails.io/docs](https://wails.io/docs)
+-   [wails project config](https://wails.io/docs/reference/project-config)
+-   [build readme](build/README.md)
+-   [frontend readme](frontend/README.md)
 
 ## Electron? - Nope!
 
 [wails.io](https://wails.io) - Build beautiful cross-platform applications using Go.
 
-[wails project config](https://wails.io/docs/reference/project-config)
+Wails relies on WebView:
+
+-   Less memory usage
+-   Smaller binary size (<10MB)
+-   Written in Go (Go is a better language for native apps from JS, and easier to work with than C/C++/Rust)
