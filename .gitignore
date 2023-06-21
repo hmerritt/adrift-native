@@ -1,4 +1,17 @@
+
+# build
 build/bin
+
+# darwin
+build/darwin
+!build/darwin/Info.dev.plist
+!build/darwin/Info.plist
+
+# windows
+build/windows
+!build/windows/info.json
+!build/windows/wails.exe.manifest
+
+# frontend
 node_modules
 frontend/dist
-build/windows/installer/tmp/MicrosoftEdgeWebview2Setup.exe
