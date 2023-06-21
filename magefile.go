@@ -18,7 +18,11 @@ func Bootstrap() error {
 }
 
 func Test() error {
-	return sh.Run("gotestsum", "--format", "pkgname", "--", "--cover", "./...")
+	// Runs both Go, and frontend tests
+	return RunSync([][]string{
+		{"gotestsum", "--format", "pkgname", "--", "--cover", "./..."},
+		{"yarn", "--cwd", "frontend", "test"},
+	})
 }
 
 func Dev() error {
