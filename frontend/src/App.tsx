@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 
-import { Home, NotFound } from "pages";
+import { Home, NotFound } from "view/screens";
 
 function App() {
 	return (
