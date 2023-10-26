@@ -21,7 +21,9 @@ enum ConsoleFunctions {
 	log = "log",
 	table = "table",
 	trace = "trace",
-	warn = "warn"
+	warn = "warn",
+	group = "group",
+	groupEnd = "groupEnd"
 }
 
 type chars = string | number;

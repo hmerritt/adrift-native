@@ -1,9 +1,9 @@
 export const NotFound = () => {
 	return (
-		<div className="NotFound">
+		<div>
 			<div className="flex-center" style={{ height: "100vh" }}>
 				<h2 style={{ fontSize: "2rem", textAlign: "center" }}>
-					Page not found :(
+					404, Page not found :(
 				</h2>
 			</div>
 		</div>

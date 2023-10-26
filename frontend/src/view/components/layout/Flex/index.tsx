@@ -1,4 +1,4 @@
-export interface FlexProps {
+export type FlexProps = JSX.IntrinsicElements["div"] & {
 	center?: boolean;
 	grow?: boolean;
 	row?: boolean;
@@ -6,8 +6,7 @@ export interface FlexProps {
 	wrap?: boolean;
 	vc?: boolean;
 	hc?: boolean;
-	[x: string]: any;
-}
+};
 
 export const Flex = ({
 	center = false,

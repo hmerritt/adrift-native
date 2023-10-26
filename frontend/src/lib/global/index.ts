@@ -11,6 +11,7 @@
  * @Warning - Since the window object is exposed, don't put anything remotely sensitive in here.
  */
 
+import { injectDevTools } from "./devTools";
 import { injectFeature } from "./featureFlags";
 import { injectLog } from "./log";
 import { versionString } from "./version";
@@ -22,6 +23,7 @@ export const globalInit = () => {
 	// Inject global functions.
 	injectLog();
 	injectFeature();
+	if (import.meta.env.MODE !== "production") injectDevTools();
 };
 
 globalInit();
