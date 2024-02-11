@@ -12,8 +12,8 @@ bootstrap();
 // Run anything you like, here we get the app version from the package.json + the current commit hash.
 // prettier-ignore
 async function bootstrap() {
-	const gitCommitHash = await core.run(`git rev-parse HEAD`, path, null);
-	const gitCommitHashShort = gitCommitHash ? core.shorten(gitCommitHash) : null;
+	const gitCommitHash = await core.run(`git rev-parse HEAD`, path, '');
+	const gitCommitHashShort = gitCommitHash ? core.shorten(gitCommitHash) : '';
 	const gitBranch = await core.getGitBranch(path);
 	const appVersion = packageJSON?.version;
 	const appName = packageJSON?.name;
@@ -29,6 +29,9 @@ async function bootstrap() {
 		["VITE_VERSION", appVersion],
 		["VITE_GIT_BRANCH", gitBranch],
 		["VITE_GIT_COMMIT", gitCommitHashShort],
+		['VITE_PLAUSIBLE_ENABLE', false],
+		['VITE_PLAUSIBLE_DOMAIN', 'mrrtt.me'],
+		['VITE_PLAUSIBLE_API_HOST', 'https://plausible.mrrtt.me']
 	];
 
 	const isProd = args.length >= 2 && (args[1] === "build" || args[1] === "preview");
@@ -37,5 +40,9 @@ async function bootstrap() {
 	const isTest = args.length >= 1 && args[0] === "vitest";
 	if (isTest) env[0][1] = "test";
 
+	// Log app name and version info
+	console.log(`${core.versionString(appName, appVersion, gitBranch, gitCommitHashShort)}\n`);
+
+	// Run bootstrap script
 	core.bootstrap(env, allowEnvOverride, args, path);
 }

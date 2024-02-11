@@ -1,6 +1,8 @@
 import { css, cx } from "@linaria/core";
 import { useEffect, useRef } from "react";
 
+import { Image, ImageProps } from "../Image";
+
 const canvasNoise = (
 	ctx: CanvasRenderingContext2D,
 	patternSize = 64,
@@ -37,7 +39,8 @@ export type NoiseProps = {
 export type NoiseImgProps = NoiseProps &
 	JSX.IntrinsicElements["div"] & {
 		src?: string;
-		imgProps?: JSX.IntrinsicElements["img"];
+		imgProps?: ImageProps;
+		childrenIsAboveNoise?: boolean;
 	};
 
 /**
@@ -49,14 +52,14 @@ export const Noise = ({
 	framerate = 12,
 	size = 256,
 	alpha = 25,
-	reactToWindowResize = false
+	reactToWindowResize = true
 }) => {
 	const $canvas = useRef<HTMLCanvasElement>(null);
 
 	useEffect(() => {
 		const canvas = $canvas.current;
-		const ctx = canvas?.getContext("2d");
-		if (!canvas || !ctx) return;
+		const ctx = canvas?.getContext?.("2d");
+		if (!ctx || !canvas?.getContext) return;
 
 		canvasResize(canvas, size);
 
@@ -86,7 +89,7 @@ export const Noise = ({
 		};
 	}, [framerate, reactToWindowResize]);
 
-	return <canvas ref={$canvas} className={canvas} />;
+	return <canvas ref={$canvas} className={canvasStyle} />;
 };
 
 /**
@@ -97,37 +100,55 @@ export const NoiseImg = ({
 	framerate = 12,
 	size = 256,
 	alpha = 25,
-	reactToWindowResize = false,
+	reactToWindowResize = true,
 	// Img
 	src,
 	imgProps,
 	// NoiseImg
 	children,
+	childrenIsAboveNoise = true,
 	className,
 	...divProps
 }: NoiseImgProps) => {
 	return (
 		<div className={cx(noiseImg, className)} {...divProps}>
-			<img src={src} width="100%" height="100%" draggable={false} {...imgProps} />
+			<Image
+				src={src}
+				width="100%"
+				height="100%"
+				hideWhileLoading={true}
+				{...imgProps}
+			/>
 			<Noise
 				framerate={framerate}
 				size={size}
 				alpha={alpha}
 				reactToWindowResize={reactToWindowResize}
 			/>
-			{children && <div className={noiseImgChildren}>{children}</div>}
+			{children && (
+				<div
+					className={cx(
+						noiseImgChildren,
+						childrenIsAboveNoise
+							? noiseImgChildrenAbove
+							: noiseImgChildrenBelow
+					)}
+				>
+					{children}
+				</div>
+			)}
 		</div>
 	);
 };
 
 // Fill parent container
-const canvas = css`
+const canvasStyle = css`
 	position: absolute;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
-	z-index: 100;
+	z-index: 10;
 	user-select: none;
 	pointer-events: none;
 `;
@@ -142,5 +163,12 @@ const noiseImgChildren = css`
 	left: 0;
 	width: 100%;
 	height: 100%;
-	z-index: 55;
+`;
+
+const noiseImgChildrenAbove = css`
+	z-index: 20;
+`;
+
+const noiseImgChildrenBelow = css`
+	z-index: 5;
 `;

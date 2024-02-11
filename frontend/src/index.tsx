@@ -1,24 +1,20 @@
 import { StrictMode } from "react";
-import { Provider } from "react-redux";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter as Router } from "react-router-dom";
 
+import { plausibleBootstrap } from "lib/analytics";
+import "lib/styles/global/index.scss";
+
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import App from "./App";
 
-import store from "state";
-import "lib/styles/global/index.scss";
-import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
+plausibleBootstrap();
 
 const rootElement = document.getElementById("root");
 const root = createRoot(rootElement as HTMLElement);
 
 root.render(
 	<StrictMode>
-		<Provider store={store}>
-			<Router>
-				<App />
-			</Router>
-		</Provider>
+		<App />
 	</StrictMode>
 );
 

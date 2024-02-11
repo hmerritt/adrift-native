@@ -29,7 +29,7 @@ interface StackProps extends FlexProps {
 export const Stack = ({ className, row = false, spacing = 1, ...props }: StackProps) => {
 	return (
 		<Flex
-			className={cx(className, `${row ? "stack-row" : "stack"} stack-${spacing}`)}
+			className={cx(className, row ? "stack-row" : "stack", `stack-${spacing}`)}
 			row={row}
 			{...props}
 		/>

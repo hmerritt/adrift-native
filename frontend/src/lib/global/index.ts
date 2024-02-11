@@ -10,20 +10,27 @@
  *
  * @Warning - Since the window object is exposed, don't put anything remotely sensitive in here.
  */
-
 import { injectDevTools } from "./devTools";
+import { injectEnv } from "./env";
 import { injectFeature } from "./featureFlags";
 import { injectLog } from "./log";
 import { versionString } from "./version";
 
 export const globalInit = () => {
-	if (import.meta.env.MODE !== "test")
-		console.log(`%c${versionString()}`, "font-size: 1.1em;");
-
 	// Inject global functions.
+	injectEnv();
 	injectLog();
 	injectFeature();
-	if (import.meta.env.MODE !== "production") injectDevTools();
+
+	// Log app name+version. Hide for tests to reduce clutter in console.
+	if (!env.isTesting) {
+		console.log(`%c${versionString()}`, "font-size: 1.1em;padding: 1rem 0;");
+	}
+
+	if (env.isDevelopment) {
+		injectDevTools();
+		console.log("env", env);
+	}
 };
 
 globalInit();

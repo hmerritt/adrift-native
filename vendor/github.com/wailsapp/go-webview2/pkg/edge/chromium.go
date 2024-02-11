@@ -14,28 +14,30 @@ import (
 	"unsafe"
 
 	"github.com/wailsapp/go-webview2/internal/w32"
+	"github.com/wailsapp/go-webview2/webviewloader"
 	"golang.org/x/sys/windows"
 )
 
 type Rect = w32.Rect
 
 type Chromium struct {
-	hwnd                  uintptr
-	controller            *ICoreWebView2Controller
-	webview               *ICoreWebView2
-	inited                uintptr
-	envCompleted          *iCoreWebView2CreateCoreWebView2EnvironmentCompletedHandler
-	controllerCompleted   *iCoreWebView2CreateCoreWebView2ControllerCompletedHandler
-	webMessageReceived    *iCoreWebView2WebMessageReceivedEventHandler
-	permissionRequested   *iCoreWebView2PermissionRequestedEventHandler
-	webResourceRequested  *iCoreWebView2WebResourceRequestedEventHandler
-	acceleratorKeyPressed *ICoreWebView2AcceleratorKeyPressedEventHandler
-	navigationCompleted   *ICoreWebView2NavigationCompletedEventHandler
-	processFailed         *ICoreWebView2ProcessFailedEventHandler
+	hwnd                             uintptr
+	controller                       *ICoreWebView2Controller
+	webview                          *ICoreWebView2
+	inited                           uintptr
+	envCompleted                     *iCoreWebView2CreateCoreWebView2EnvironmentCompletedHandler
+	controllerCompleted              *iCoreWebView2CreateCoreWebView2ControllerCompletedHandler
+	webMessageReceived               *iCoreWebView2WebMessageReceivedEventHandler
+	containsFullScreenElementChanged *ICoreWebView2ContainsFullScreenElementChangedEventHandler
+	permissionRequested              *iCoreWebView2PermissionRequestedEventHandler
+	webResourceRequested             *iCoreWebView2WebResourceRequestedEventHandler
+	acceleratorKeyPressed            *ICoreWebView2AcceleratorKeyPressedEventHandler
+	navigationCompleted              *ICoreWebView2NavigationCompletedEventHandler
+	processFailed                    *ICoreWebView2ProcessFailedEventHandler
 
-	environment *ICoreWebView2Environment
-
-	padding Rect
+	environment            *ICoreWebView2Environment
+	padding                Rect
+	webview2RuntimeVersion string
 
 	// Settings
 	Debug                 bool
@@ -48,11 +50,13 @@ type Chromium struct {
 	globalPermission *CoreWebView2PermissionState
 
 	// Callbacks
-	MessageCallback              func(string)
-	WebResourceRequestedCallback func(request *ICoreWebView2WebResourceRequest, args *ICoreWebView2WebResourceRequestedEventArgs)
-	NavigationCompletedCallback  func(sender *ICoreWebView2, args *ICoreWebView2NavigationCompletedEventArgs)
-	ProcessFailedCallback        func(sender *ICoreWebView2, args *ICoreWebView2ProcessFailedEventArgs)
-	AcceleratorKeyCallback       func(uint) bool
+	MessageCallback                          func(string)
+	MessageWithAdditionalObjectsCallback     func(message string, sender *ICoreWebView2, args *ICoreWebView2WebMessageReceivedEventArgs)
+	WebResourceRequestedCallback             func(request *ICoreWebView2WebResourceRequest, args *ICoreWebView2WebResourceRequestedEventArgs)
+	NavigationCompletedCallback              func(sender *ICoreWebView2, args *ICoreWebView2NavigationCompletedEventArgs)
+	ProcessFailedCallback                    func(sender *ICoreWebView2, args *ICoreWebView2ProcessFailedEventArgs)
+	ContainsFullScreenElementChangedCallback func(sender *ICoreWebView2, args *ICoreWebView2ContainsFullScreenElementChangedEventArgs)
+	AcceleratorKeyCallback                   func(uint) bool
 }
 
 func NewChromium() *Chromium {
@@ -76,12 +80,32 @@ func NewChromium() *Chromium {
 	e.acceleratorKeyPressed = newICoreWebView2AcceleratorKeyPressedEventHandler(e)
 	e.navigationCompleted = newICoreWebView2NavigationCompletedEventHandler(e)
 	e.processFailed = newICoreWebView2ProcessFailedEventHandler(e)
+	e.containsFullScreenElementChanged = newICoreWebView2ContainsFullScreenElementChangedEventHandler(e)
+	/*
+		// Pinner seems to panic in some cases as reported on Discord, maybe during shutdown when GC detects pinned objects
+		// to be released that have not been unpinned.
+		// It would also be better to use our ComBridge for this event handlers implementation instead of pinning them.
+		// So all COM Implementations on the go-side use the same code.
+		var pinner runtime.Pinner
+		pinner.Pin(e.envCompleted)
+		pinner.Pin(e.controllerCompleted)
+		pinner.Pin(e.webMessageReceived)
+		pinner.Pin(e.permissionRequested)
+		pinner.Pin(e.webResourceRequested)
+		pinner.Pin(e.acceleratorKeyPressed)
+		pinner.Pin(e.navigationCompleted)
+		pinner.Pin(e.processFailed)
+		pinner.Pin(e.containsFullScreenElementChanged)
+	*/
 	e.permissions = make(map[CoreWebView2PermissionKind]CoreWebView2PermissionState)
 
 	return e
 }
 
 func (e *Chromium) Embed(hwnd uintptr) bool {
+
+	var err error
+
 	e.hwnd = hwnd
 
 	dataPath := e.DataPath
@@ -106,6 +130,12 @@ func (e *Chromium) Embed(hwnd uintptr) bool {
 	browserArgs := strings.Join(e.AdditionalBrowserArgs, " ")
 	if err := createCoreWebView2EnvironmentWithOptions(e.BrowserPath, dataPath, e.envCompleted, browserArgs); err != nil {
 		log.Printf("Error calling Webview2Loader: %v", err)
+		return false
+	}
+
+	e.webview2RuntimeVersion, err = webviewloader.GetAvailableCoreWebView2BrowserVersionString(e.BrowserPath)
+	if err != nil {
+		log.Printf("Error getting Webview2 runtime version: %v", err)
 		return false
 	}
 
@@ -164,6 +194,13 @@ func (e *Chromium) Navigate(url string) {
 	)
 }
 
+func (e *Chromium) NavigateToString(content string) {
+	e.webview.vtbl.NavigateToString.Call(
+		uintptr(unsafe.Pointer(e.webview)),
+		uintptr(unsafe.Pointer(windows.StringToUTF16Ptr(content))),
+	)
+}
+
 func (e *Chromium) Init(script string) {
 	e.webview.vtbl.AddScriptToExecuteOnDocumentCreated.Call(
 		uintptr(unsafe.Pointer(e.webview)),
@@ -173,6 +210,10 @@ func (e *Chromium) Init(script string) {
 }
 
 func (e *Chromium) Eval(script string) {
+
+	if e.webview == nil {
+		return
+	}
 
 	_script, err := windows.UTF16PtrFromString(script)
 	if err != nil {
@@ -261,6 +302,11 @@ func (e *Chromium) CreateCoreWebView2ControllerCompleted(res uintptr, controller
 		uintptr(unsafe.Pointer(e.processFailed)),
 		uintptr(unsafe.Pointer(&token)),
 	)
+	e.webview.vtbl.AddContainsFullScreenElementChanged.Call(
+		uintptr(unsafe.Pointer(e.webview)),
+		uintptr(unsafe.Pointer(e.containsFullScreenElementChanged)),
+		uintptr(unsafe.Pointer(&token)),
+	)
 
 	e.controller.AddAcceleratorKeyPressed(e.acceleratorKeyPressed, &token)
 
@@ -269,25 +315,70 @@ func (e *Chromium) CreateCoreWebView2ControllerCompleted(res uintptr, controller
 	return 0
 }
 
-func (e *Chromium) MessageReceived(sender *ICoreWebView2, args *iCoreWebView2WebMessageReceivedEventArgs) uintptr {
-	var message *uint16
+func (e *Chromium) ContainsFullScreenElementChanged(sender *ICoreWebView2, args *ICoreWebView2ContainsFullScreenElementChangedEventArgs) uintptr {
+	if e.ContainsFullScreenElementChangedCallback != nil {
+		e.ContainsFullScreenElementChangedCallback(sender, args)
+	}
+	return 0
+}
+
+func (e *Chromium) MessageReceived(sender *ICoreWebView2, args *ICoreWebView2WebMessageReceivedEventArgs) uintptr {
+	var _message *uint16
 	args.vtbl.TryGetWebMessageAsString.Call(
 		uintptr(unsafe.Pointer(args)),
-		uintptr(unsafe.Pointer(&message)),
+		uintptr(unsafe.Pointer(&_message)),
 	)
-	if e.MessageCallback != nil {
-		e.MessageCallback(w32.Utf16PtrToString(message))
+
+	message := w32.Utf16PtrToString(_message)
+
+	if hasCapability(e.webview2RuntimeVersion, GetAdditionalObjects) {
+		obj, err := args.GetAdditionalObjects()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if obj != nil && e.MessageWithAdditionalObjectsCallback != nil {
+			defer obj.Release()
+			e.MessageWithAdditionalObjectsCallback(message, sender, args)
+		} else if e.MessageCallback != nil {
+			e.MessageCallback(message)
+		}
+	} else if e.MessageCallback != nil {
+		e.MessageCallback(message)
 	}
+
 	sender.vtbl.PostWebMessageAsString.Call(
 		uintptr(unsafe.Pointer(sender)),
-		uintptr(unsafe.Pointer(message)),
+		uintptr(unsafe.Pointer(_message)),
 	)
-	windows.CoTaskMemFree(unsafe.Pointer(message))
+	windows.CoTaskMemFree(unsafe.Pointer(_message))
 	return 0
 }
 
 func (e *Chromium) SetPermission(kind CoreWebView2PermissionKind, state CoreWebView2PermissionState) {
 	e.permissions[kind] = state
+}
+
+func (e *Chromium) SetBackgroundColour(R, G, B, A uint8) {
+	controller := e.GetController()
+	controller2 := controller.GetICoreWebView2Controller2()
+
+	backgroundCol := COREWEBVIEW2_COLOR{
+		A: A,
+		R: R,
+		G: G,
+		B: B,
+	}
+
+	// WebView2 only has 0 and 255 as valid values.
+	if backgroundCol.A > 0 && backgroundCol.A < 255 {
+		backgroundCol.A = 255
+	}
+
+	err := controller2.PutDefaultBackgroundColor(backgroundCol)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (e *Chromium) SetGlobalPermission(state CoreWebView2PermissionState) {
@@ -416,4 +507,67 @@ func (e *Chromium) PutZoomFactor(zoomFactor float64) {
 
 func (e *Chromium) OpenDevToolsWindow() {
 	e.webview.OpenDevToolsWindow()
+}
+
+func (e *Chromium) HasCapability(c Capability) bool {
+	return hasCapability(e.webview2RuntimeVersion, c)
+}
+
+func (e *Chromium) GetIsSwipeNavigationEnabled() (bool, error) {
+	if !hasCapability(e.webview2RuntimeVersion, SwipeNavigation) {
+		return false, UnsupportedCapabilityError
+	}
+	webview2Settings, err := e.webview.GetSettings()
+	if err != nil {
+		return false, err
+	}
+	webview2Settings6 := webview2Settings.GetICoreWebView2Settings6()
+	var result bool
+	result, err = webview2Settings6.GetIsSwipeNavigationEnabled()
+	if err != windows.DS_S_SUCCESS {
+		return false, err
+	}
+	return result, nil
+}
+
+func (e *Chromium) PutIsSwipeNavigationEnabled(enabled bool) error {
+	if !hasCapability(e.webview2RuntimeVersion, SwipeNavigation) {
+		return UnsupportedCapabilityError
+	}
+	webview2Settings, err := e.webview.GetSettings()
+	if err != nil {
+		return err
+	}
+	webview2Settings6 := webview2Settings.GetICoreWebView2Settings6()
+	err = webview2Settings6.PutIsSwipeNavigationEnabled(enabled)
+	if err != windows.DS_S_SUCCESS {
+		return err
+	}
+	return nil
+}
+
+func (e *Chromium) AllowExternalDrag(allow bool) error {
+	if !hasCapability(e.webview2RuntimeVersion, AllowExternalDrop) {
+		return UnsupportedCapabilityError
+	}
+	controller := e.GetController()
+	controller4 := controller.GetICoreWebView2Controller4()
+	err := controller4.PutAllowExternalDrop(allow)
+	if err != windows.DS_S_SUCCESS {
+		return err
+	}
+	return nil
+}
+
+func (e *Chromium) GetAllowExternalDrag() (bool, error) {
+	if !hasCapability(e.webview2RuntimeVersion, AllowExternalDrop) {
+		return false, UnsupportedCapabilityError
+	}
+	controller := e.GetController()
+	controller4 := controller.GetICoreWebView2Controller4()
+	result, err := controller4.GetAllowExternalDrop()
+	if err != windows.DS_S_SUCCESS {
+		return false, err
+	}
+	return result, nil
 }

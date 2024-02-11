@@ -1,9 +1,25 @@
-//
-//
-//
-
 body {
-	overflow-x: hidden;
+	font-family:
+		"MiSans",
+		Tahoma,
+		"Roboto",
+		-apple-system,
+		BlinkMacSystemFont,
+		sans-serif;
+	font-smooth: always;
+	touch-action: manipulation;
+	font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+}
+
+.hidden {
+	opacity: 0;
+}
+
+.none {
+	display: none;
 }
 
 .text-overflow-ellipsis {

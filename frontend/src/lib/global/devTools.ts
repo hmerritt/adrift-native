@@ -1,4 +1,6 @@
-import { $global } from "./utils";
+import { setGlobalValue } from "./utils";
+
+// @TODO maybe remove these and add better dev tools.
 
 export const getNumberOfEventListeners = () => {
 	try {
@@ -39,6 +41,6 @@ export const getObjectOfEventListeners = () => {
 };
 
 export const injectDevTools = () => {
-	$global.getNumberOfEventListeners = getNumberOfEventListeners;
-	$global.getObjectOfEventListeners = getObjectOfEventListeners;
+	setGlobalValue("getNumberOfEventListeners", getNumberOfEventListeners);
+	setGlobalValue("getObjectOfEventListeners", getObjectOfEventListeners);
 };

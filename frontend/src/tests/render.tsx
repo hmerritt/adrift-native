@@ -1,32 +1,59 @@
-import { ReactElement, JSXElementConstructor } from "react";
+import { RouterProvider } from "@tanstack/react-router";
+import { render as reactRender, waitFor } from "@testing-library/react";
+import { JSXElementConstructor, ReactElement } from "react";
 import { Provider } from "react-redux";
-import { MemoryRouter } from "react-router-dom";
-import { render as reactRender } from "@testing-library/react";
-
 import store from "state";
 
-type element = ReactElement<any, string | JSXElementConstructor<any>>;
+import { createTestRouter } from "./utils";
 
-type children = {
-	children: element;
+export type Element = ReactElement<any, string | JSXElementConstructor<any>>;
+
+type Children = {
+	children: Element;
 };
 
-export const render = (ui: element, route = "") => {
-	const Wrapper = ({ children }: children) => {
+const internalTestId = "__routerHasMounted";
+
+export const render = async (ui: Element, skipWaitFor = false) => {
+	const Wrapper = ({ children }: Children) => {
 		return (
 			<Provider store={store}>
-				<MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>
+				<RouterProvider
+					router={createTestRouter(
+						<div data-testid={internalTestId}>{children}</div>
+					)}
+				/>
 			</Provider>
 		);
 	};
 
-	return reactRender(ui, { wrapper: Wrapper });
+	const r = reactRender(ui, { wrapper: Wrapper });
+
+	if (!skipWaitFor) {
+		await waitFor(() => {
+			r.getByTestId(internalTestId);
+		});
+	}
+
+	return r;
 };
 
-export const renderBasic = (ui: element) => {
-	const Wrapper = ({ children }: children) => {
-		return <Provider store={store}>{children}</Provider>;
+export const renderBasic = async (ui: Element, skipWaitFor = false) => {
+	const Wrapper = ({ children }: Children) => {
+		return (
+			<Provider store={store}>
+				<div data-testid={internalTestId}>{children}</div>
+			</Provider>
+		);
 	};
 
-	return reactRender(ui, { wrapper: Wrapper });
+	const r = reactRender(ui, { wrapper: Wrapper });
+
+	if (!skipWaitFor) {
+		await waitFor(() => {
+			r.getByTestId(internalTestId);
+		});
+	}
+
+	return r;
 };

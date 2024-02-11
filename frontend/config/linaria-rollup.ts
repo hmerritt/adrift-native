@@ -1,30 +1,40 @@
 /**
- * This file contains a Rollup loader for Linaria.
+ * This file contains a Vite loader for wyw-in-js.
  * It uses the transform.ts function to generate class names from source code,
  * returns transformed code without template literals and attaches generated source maps
  */
-
-import path from "path";
-import fs from "fs";
-
-import { createFilter } from "@rollup/pluginutils";
 import type { FilterPattern } from "@rollup/pluginutils";
+import { createFilter } from "@rollup/pluginutils";
+import { logger, syncResolve } from "@wyw-in-js/shared";
+import type {
+	IFileReporterOptions,
+	PluginOptions,
+	Preprocessor
+} from "@wyw-in-js/transform";
+import {
+	TransformCacheCollection,
+	createFileReporter,
+	getFileIdx,
+	slugify,
+	transform
+} from "@wyw-in-js/transform";
+import { existsSync } from "fs";
+import path from "path";
+import { optimizeDeps } from "vite";
 import type { ModuleNode, Plugin, ResolvedConfig, ViteDevServer } from "vite";
 
-import { transform, slugify, TransformCacheCollection } from "@linaria/babel-preset";
-import type { PluginOptions, Preprocessor } from "@linaria/babel-preset";
-import { syncResolve } from "@linaria/utils";
-
 type VitePluginOptions = {
-	include?: FilterPattern;
+	debug?: IFileReporterOptions | false | null | undefined;
 	exclude?: FilterPattern;
-	sourceMap?: boolean;
+	include?: FilterPattern;
 	preprocessor?: Preprocessor;
+	sourceMap?: boolean;
 } & Partial<PluginOptions>;
 
 export { Plugin };
 
-export default function linaria({
+export default function wywInJS({
+	debug,
 	include,
 	exclude,
 	sourceMap,
@@ -37,13 +47,17 @@ export default function linaria({
 	let config: ResolvedConfig;
 	let devServer: ViteDevServer;
 
+	const { emitter, onDone } = createFileReporter(debug ?? false);
+
 	// <dependency id, targets>
-	const targets: { id: string; dependencies: string[] }[] = [];
+	const targets: { dependencies: string[]; id: string }[] = [];
 	const cache = new TransformCacheCollection();
-	const { codeCache, evalCache } = cache;
 	return {
-		name: "linaria",
+		name: "wyw-in-js",
 		enforce: "post",
+		buildEnd() {
+			onDone(process.cwd());
+		},
 		configResolved(resolvedConfig: ResolvedConfig) {
 			config = resolvedConfig;
 		},
@@ -76,15 +90,13 @@ export default function linaria({
 
 			// eslint-disable-next-line no-restricted-syntax
 			for (const depId of deps) {
-				codeCache.delete(depId);
-				evalCache.delete(depId);
+				cache.invalidateForFile(depId);
 			}
-			const modules = affected
+
+			return affected
 				.map((target) => devServer.moduleGraph.getModuleById(target.id))
 				.concat(ctx.modules)
 				.filter((m): m is ModuleNode => !!m);
-
-			return modules;
 		},
 		async transform(code: string, url: string) {
 			const [id] = url.split("?", 1);
@@ -92,9 +104,9 @@ export default function linaria({
 			// Do not transform ignored and generated files
 			if (url.includes("node_modules") || !filter(url) || id in cssLookup) return;
 
-			// const log = createCustomDebug("rollup", getFileIdx(id));
+			const log = logger.extend("vite").extend(getFileIdx(id));
 
-			// log("rollup-init", id);
+			log("transform %s", id);
 
 			const asyncResolve = async (
 				what: string,
@@ -107,11 +119,11 @@ export default function linaria({
 						// If module is marked as external, Rollup will not resolve it,
 						// so we need to resolve it ourselves with default resolver
 						const resolvedId = syncResolve(what, importer, stack);
-						// log("resolve", "✅ '%s'@'%s -> %O\n%s", what, importer, resolved);
+						log("resolve ✅ '%s'@'%s -> %O\n%s", what, importer, resolved);
 						return resolvedId;
 					}
 
-					// log("resolve", "✅ '%s'@'%s -> %O\n%s", what, importer, resolved);
+					log("resolve ✅ '%s'@'%s -> %O\n%s", what, importer, resolved);
 					// Vite adds param like `?v=667939b3` to cached modules
 					const resolvedId = resolved.id.split("?", 1)[0];
 
@@ -121,39 +133,55 @@ export default function linaria({
 						return null;
 					}
 
+					if (!existsSync(resolvedId)) {
+						await optimizeDeps(config);
+					}
+
 					return resolvedId;
 				}
 
-				// log("resolve", "❌ '%s'@'%s", what, importer);
+				log("resolve ❌ '%s'@'%s", what, importer);
 				throw new Error(`Could not resolve ${what}`);
 			};
 
-			// TODO: Vite surely has some already transformed modules, solid
-			// why would we transform it again?
-			// We could provide some thing like `pretransform` and ask Vite to return transformed module
-			// (module.transformResult)
-			// So we don't need to duplicate babel plugins.
-			const result = await transform(
-				code,
-				{
+			const transformServices = {
+				options: {
 					filename: id,
+					root: process.cwd(),
 					preprocessor,
 					pluginOptions: rest
 				},
-				asyncResolve,
-				{},
-				cache
-			);
+				cache,
+				eventEmitter: emitter
+			};
+
+			const result = await transform(transformServices, code, asyncResolve);
 
 			let { cssText, dependencies } = result;
 
-			if (!cssText) return;
+			// Heads up, there are three cases:
+			// 1. cssText is undefined, it means that file was not transformed
+			// 2. cssText is empty, it means that file was transformed, but it does not contain any styles
+			// 3. cssText is not empty, it means that file was transformed and it contains styles
+
+			if (typeof cssText === "undefined") {
+				return;
+			}
+
+			if (cssText === "") {
+				/* eslint-disable-next-line consistent-return */
+				return {
+					code: result.code,
+					map: result.sourceMap
+				};
+			}
+
 			dependencies ??= [];
 
 			const slug = slugify(cssText);
 
 			// @IMPORTANT: We *need* to use `.scss` extension here.
-			// This tiny change is the only difference between this file and using `@linaria/vite`.
+			// This tiny change is the only difference between this file and using `https://github.com/Anber/wyw-in-js/blob/main/packages/vite/src/index.ts`.
 			const cssFilename = path
 				.normalize(`${id.replace(/\.[jt]sx?$/, "")}_${slug}.scss`)
 				.replace(/\\/g, path.posix.sep);
@@ -164,10 +192,6 @@ export default function linaria({
 
 			const cssId = `/${cssRelativePath}`;
 
-			// @IMPORTANT: This doesn't work, yet.
-			// Double-check file exists. throws an error and fails the build if not found.
-			// await fs.promises.access(cssFilename, fs.constants.F_OK);
-
 			if (sourceMap && result.cssSourceMapText) {
 				const map = Buffer.from(result.cssSourceMapText).toString("base64");
 				cssText += `/*# sourceMappingURL=data:application/json;base64,${map}*/`;
@@ -177,7 +201,6 @@ export default function linaria({
 			cssFileLookup[cssId] = cssFilename;
 
 			result.code += `\nimport ${JSON.stringify(cssFilename)};\n`;
-
 			if (devServer?.moduleGraph) {
 				const module = devServer.moduleGraph.getModuleById(cssId);
 
@@ -195,7 +218,6 @@ export default function linaria({
 				});
 				if (depModule) dependencies[i] = depModule.id;
 			}
-
 			const target = targets.find((t) => t.id === id);
 			if (!target) targets.push({ id, dependencies });
 			else target.dependencies = dependencies;

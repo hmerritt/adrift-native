@@ -432,6 +432,7 @@ a:target {
 html,
 body {
 	height: 100%;
+	-webkit-tap-highlight-color: transparent;
 }
 
 /**
@@ -439,17 +440,6 @@ body {
 */
 html {
 	font-size: 62.5%;
-}
-
-body {
-	font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Oxygen", "Ubuntu",
-		"Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-	font-smooth: always;
-	touch-action: manipulation;
-	font-smoothing: antialiased;
-	text-rendering: optimizeLegibility;
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-font-smoothing: antialiased;
 }
 
 h1,
@@ -475,9 +465,13 @@ strong {
 	font-weight: bold;
 }
 
+img {
+	transition: opacity 80ms ease-in-out;
+}
+
 svg {
-	width: 2.5rem;
-	height: 2.5rem;
+	width: 1rem;
+	height: 1rem;
 }
 
 ::selection,

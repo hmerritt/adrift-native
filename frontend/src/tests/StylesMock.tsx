@@ -9,7 +9,7 @@ import theme from "lib/styles";
  */
 
 export const StylesMock = () => (
-	<div className={cx(container, shadow, variable)}>
+	<div data-testid="StylesMock" className={cx(container, shadow, variable)}>
 		<h1 className={title}>Title</h1>
 		<h2 className={subTitle}>Sub Title</h2>
 	</div>

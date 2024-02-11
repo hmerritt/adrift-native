@@ -1,8 +1,9 @@
 // @ts-nocheck
-import { defineConfig } from "vite";
+import { TanStackRouterVite } from "@tanstack/router-vite-plugin";
 import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { injectManifest } from "rollup-plugin-workbox";
+import { defineConfig } from "vite";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 import linaria from "./config/linaria-rollup";
 
@@ -23,6 +24,9 @@ export default defineConfig({
 			babelrc: true
 		}),
 		tsconfigPaths(),
+		TanStackRouterVite({
+			routesDirectory: "src/view/routes"
+		}),
 		linaria({
 			sourceMap: isDev,
 			extension: ".scss",
@@ -34,7 +38,7 @@ export default defineConfig({
 			swDest: "dist/sw.js",
 			globDirectory: "dist",
 			swSrc: "src/service-worker.ts",
-			maximumFileSizeToCacheInBytes: 6 * 1024 * 1024
+			maximumFileSizeToCacheInBytes: 10 * 1024 * 1024
 		})
 	],
 	test: {
@@ -43,13 +47,14 @@ export default defineConfig({
 		environment: "happy-dom",
 		setupFiles: "./src/tests/setupTests.ts",
 		css: true, // @Note Parsing CSS is slow
+		exclude: ["node_modules", "tests-e2e", "dist", ".idea", ".git", ".cache"],
 		coverage: {
 			enabled: false,
 			provider: "v8"
 		},
 		benchmark: {
 			include: ["**/*.{bench,benchmark}.?(c|m)[jt]s?(x)"],
-			exclude: ["node_modules", "dist", ".idea", ".git", ".cache"]
+			exclude: ["node_modules", "tests-e2e", "dist", ".idea", ".git", ".cache"]
 		},
 		// Debug
 		logHeapUsage: true

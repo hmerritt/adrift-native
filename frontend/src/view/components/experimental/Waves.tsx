@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { css } from "@linaria/core";
+import { useState } from "react";
 
-import theme from "lib/styles";
 import { useEventListener, useInterval } from "lib/hooks";
+import theme from "lib/styles";
 
 /**
  * SVG Wave
@@ -57,7 +57,7 @@ const waveContainer = css`
 	bottom: 0;
 	left: 0;
 	right: 0;
-	z-index: -10;
+	z-index: -1;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-end;

@@ -136,7 +136,7 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
     return NO;
 }
 
-- (void) CreateWindow:(int)width :(int)height :(bool)frameless :(bool)resizable :(bool)fullscreen :(bool)fullSizeContent :(bool)hideTitleBar :(bool)titlebarAppearsTransparent :(bool)hideTitle :(bool)useToolbar :(bool)hideToolbarSeparator :(bool)webviewIsTransparent :(bool)hideWindowOnClose :(NSString*)appearance :(bool)windowIsTranslucent :(int)minWidth :(int)minHeight :(int)maxWidth :(int)maxHeight :(bool)fraudulentWebsiteWarningEnabled {
+- (void) CreateWindow:(int)width :(int)height :(bool)frameless :(bool)resizable :(bool)fullscreen :(bool)fullSizeContent :(bool)hideTitleBar :(bool)titlebarAppearsTransparent :(bool)hideTitle :(bool)useToolbar :(bool)hideToolbarSeparator :(bool)webviewIsTransparent :(bool)hideWindowOnClose :(NSString*)appearance :(bool)windowIsTranslucent :(int)minWidth :(int)minHeight :(int)maxWidth :(int)maxHeight :(bool)fraudulentWebsiteWarningEnabled :(struct Preferences)preferences {
     NSWindowStyleMask styleMask = 0;
     
     if( !frameless ) {
@@ -214,27 +214,49 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
     config.suppressesIncrementalRendering = true;
     config.applicationNameForUserAgent = @"wails.io";
     [config setURLSchemeHandler:self forURLScheme:@"wails"];
-    
-//    [config.preferences setValue:[NSNumber numberWithBool:true] forKey:@"developerExtrasEnabled"];
 
+    if (preferences.tabFocusesLinks != NULL) {
+        config.preferences.tabFocusesLinks = *preferences.tabFocusesLinks;
+    }
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 110300
+    if (@available(macOS 11.3, *)) {
+        if (preferences.textInteractionEnabled != NULL) {
+            config.preferences.textInteractionEnabled = *preferences.textInteractionEnabled;
+        }
+    }
+#endif
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 120300
+    if (@available(macOS 12.3, *)) {
+            if (preferences.fullscreenEnabled != NULL) {
+                config.preferences.elementFullscreenEnabled = *preferences.fullscreenEnabled;
+            }
+    }
+#endif
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 101500
     if (@available(macOS 10.15, *)) {
         config.preferences.fraudulentWebsiteWarningEnabled = fraudulentWebsiteWarningEnabled;
     }
+#endif
 
     WKUserContentController* userContentController = [WKUserContentController new];
     [userContentController addScriptMessageHandler:self name:@"external"];
     config.userContentController = userContentController;
     self.userContentController = userContentController;
-    if (self.devtools) {
+
+    if (self.devtoolsEnabled) {
         [config.preferences setValue:@YES forKey:@"developerExtrasEnabled"];
-    } else if (!self.defaultContextMenu) {
+    }
+
+    if (!self.defaultContextMenuEnabled) {
         // Disable default context menus
         WKUserScript *initScript = [WKUserScript new];
         [initScript initWithSource:@"window.wails.flags.disableDefaultContextMenu = true;"
                      injectionTime:WKUserScriptInjectionTimeAtDocumentEnd
                   forMainFrameOnly:false];
         [userContentController addUserScript:initScript];
-        
     }
     
     self.webview = [WKWebView alloc];
@@ -394,7 +416,7 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
 
 - (void) SetAlwaysOnTop:(int)onTop {
     if (onTop) {
-        [self.mainWindow setLevel:NSStatusWindowLevel];
+        [self.mainWindow setLevel:NSFloatingWindowLevel];
     } else {
         [self.mainWindow setLevel:NSNormalWindowLevel];
     }
@@ -413,10 +435,11 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
     
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
     openPanel.allowsMultipleSelection = parameters.allowsMultipleSelection;
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 101400
     if (@available(macOS 10.14, *)) {
         openPanel.canChooseDirectories = parameters.allowsDirectories;
     }
-    
+#endif
     [openPanel 
         beginSheetModalForWindow:webView.window
         completionHandler:^(NSInteger result) {
@@ -540,14 +563,18 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
 #ifdef USE_NEW_FILTERS
                 NSMutableArray *contentTypes = [[NSMutableArray new] autorelease];
                 for (NSString *filter in filterList) {
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
                     if (@available(macOS 11.0, *)) {
                         UTType *t = [UTType typeWithFilenameExtension:filter];
                         [contentTypes addObject:t];
                     }
+#endif
                 }
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
             if (@available(macOS 11.0, *)) {
                 [dialog setAllowedContentTypes:contentTypes];
             }
+#endif
 #else
                 [dialog setAllowedFileTypes:filterList];
 #endif
@@ -620,17 +647,21 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
 #ifdef USE_NEW_FILTERS
             NSMutableArray *contentTypes = [[NSMutableArray new] autorelease];
             for (NSString *filter in filterList) {
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
                 if (@available(macOS 11.0, *)) {
                     UTType *t = [UTType typeWithFilenameExtension:filter];
                     [contentTypes addObject:t];
                 }
+#endif
             }
         if( contentTypes.count == 0) {
             [dialog setAllowsOtherFileTypes:true];
         } else {
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
             if (@available(macOS 11.0, *)) {
                 [dialog setAllowedContentTypes:contentTypes];
             }
+#endif
         }
 
 #else

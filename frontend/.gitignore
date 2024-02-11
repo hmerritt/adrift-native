@@ -38,3 +38,9 @@ dist-ssr
 *.local
 
 vite-app
+
+# e2e playwright tests
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

@@ -47,3 +47,27 @@ export const pluralize = (n: number, base: string, plural?: string): string => {
 	}
 	return base + "s";
 };
+
+/**
+ * Returns `s` without the provided leading `prefix` string.
+ *
+ * If `s` doesn't start with `prefix`, `s` is returned unchanged.
+ *
+ * Ported from Go-lang `strings.TrimPrefix`
+ */
+export const trimPrefix = (s: string, prefix: string) => {
+	if (s.startsWith(prefix)) return s.slice(prefix.length);
+	return s;
+};
+
+/**
+ * Returns `s` without the provided trailing `suffix` string.
+ *
+ * If `s` doesn't start with `suffix`, `s` is returned unchanged.
+ *
+ * Ported from Go-lang `strings.TrimSuffix`
+ */
+export const trimSuffix = (s: string, suffix: string) => {
+	if (s.endsWith(suffix)) return s.slice(0, s.length - suffix.length);
+	return s;
+};

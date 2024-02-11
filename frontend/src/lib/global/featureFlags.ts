@@ -1,20 +1,10 @@
-import { $global } from "./utils";
+import { type EnvKeys, env, envGet } from "./env";
+import { setGlobalValue } from "./utils";
 
 /**
- * Feature flags
- */
-export const featureFlags = {
-	// Environment
-	development: import.meta.env.MODE === "development",
-	production: import.meta.env.MODE === "production",
-	testing: import.meta.env.MODE === "testing",
-	// Features
-	timerIncrement: import.meta.env.VITE_FEATURE_INCREMENT,
-	someOtherFeature: false
-};
-
-/**
- * Returns `true` if the feature is enabled in `featureFlags` object.
+ * Returns `true` if the feature is enabled in `env` object.
+ *
+ * `true` being any non-falsy value, plus string versions of falsy values such as `"false"`, `"null"`, ect...
  */
 export const feature = (mode: FeatureFlags, options: FeatureOptions = {}): boolean => {
 	const { alwaysShowOnDev } = {
@@ -23,31 +13,26 @@ export const feature = (mode: FeatureFlags, options: FeatureOptions = {}): boole
 	};
 
 	// Bypass feature flag in dev mode if `alwaysShowOnDev` is true
-	if (
-		alwaysShowOnDev &&
-		(import.meta.env.MODE === "development" || import.meta.env.MODE === "test")
-	) {
+	if (alwaysShowOnDev && (env.isDevelopment || env.isTesting)) {
 		return true;
 	}
 
-	let match = false;
-
 	// Feature is truthy in featureFlags{}
-	if (featureFlags[mode] && !isFalse(featureFlags[mode])) {
-		match = true;
+	if (envGet(mode) && !isFalse(envGet(mode))) {
+		return true;
 	}
 
-	return match;
+	return false;
 };
 
 export type FeatureOptions = {
 	alwaysShowOnDev?: boolean;
 };
 
-export type FeatureFlags = keyof typeof featureFlags;
+export type FeatureFlags = EnvKeys;
 
 export const injectFeature = () => {
-	$global.feature = feature;
+	setGlobalValue("feature", feature);
 };
 
 const isFalse = (value: unknown): value is false => {

@@ -6,10 +6,11 @@
 // You can also remove this file if you'd prefer not to use a
 // service worker, and the Workbox build step will be skipped.
 import { clientsClaim } from "workbox-core";
+import { RouteHandler } from "workbox-core/types.js";
 import { ExpirationPlugin } from "workbox-expiration";
 import { createHandlerBoundToURL, precacheAndRoute } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
-import { StaleWhileRevalidate } from "workbox-strategies";
+import { CacheFirst, StaleWhileRevalidate } from "workbox-strategies";
 
 clientsClaim();
 
@@ -44,16 +45,31 @@ registerRoute(
 	createHandlerBoundToURL("/index.html")
 );
 
-const fileExtentionsToCache = [".png", ".jpg", ".jpeg", ".svg"];
-const fileExtentionsToCacheRegex = new RegExp(`.*(${fileExtentionsToCache.join("|")})`);
+const matchFileExtensions = (fileExtensions: string[]) => {
+	return new RegExp(`.*(${fileExtensions.join("|")})$`);
+};
 
-// An example runtime caching route for requests that aren't handled by the
-// precache, in this case same-origin .png requests like those from in public/
-registerRoute(
-	// Add in any other file extensions or routing criteria as needed.
-	({ url }) =>
-		url.origin === self.location.origin &&
-		url.pathname.match(fileExtentionsToCacheRegex), // Customize this strategy as needed, e.g., by changing to CacheFirst.
+const createFileCache = (fileExtensions: string[], handler: RouteHandler) => {
+	return registerRoute(
+		({ url }) =>
+			url.origin === self.location.origin &&
+			url.pathname.match(matchFileExtensions(fileExtensions)),
+		handler
+	);
+};
+
+// Cache fonts (heavily, since they won't change very often).
+createFileCache(
+	[".ttf", ".otf", ".woff", ".woff2"],
+	new CacheFirst({
+		cacheName: "fonts",
+		plugins: [new ExpirationPlugin({ maxEntries: 20 })]
+	})
+);
+
+// Cache images.
+createFileCache(
+	[".png", ".jpg", ".jpeg", ".svg"],
 	new StaleWhileRevalidate({
 		cacheName: "images",
 		plugins: [
@@ -71,5 +87,3 @@ self.addEventListener("message", (event) => {
 		self.skipWaiting();
 	}
 });
-
-// Any other custom service worker logic can go here.

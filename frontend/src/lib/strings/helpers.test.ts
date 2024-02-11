@@ -1,6 +1,13 @@
 import { expect, test } from "vitest";
 
-import { enforceLen, padChar, parseJSON, pluralize } from "./helpers";
+import {
+	enforceLen,
+	padChar,
+	parseJSON,
+	pluralize,
+	trimPrefix,
+	trimSuffix
+} from "./helpers";
 
 test("enforceLen", () => {
 	const inputs: [string, number, boolean][] = [
@@ -64,4 +71,20 @@ test("pluralize", () => {
 		const output = pluralize(...input);
 		expect(output).toEqual(outputs[i]);
 	}
+});
+
+test("trimPrefix", () => {
+	expect(trimPrefix("Hello World", "Hello W")).toBe("orld");
+	expect(trimPrefix("!@#wow#(*&#/", "!@#w")).toBe("ow#(*&#/");
+
+	expect(trimPrefix("Hello World", " World")).toBe("Hello World");
+	expect(trimPrefix("!@#wow#(*&#/", "@#wo")).toBe("!@#wow#(*&#/");
+});
+
+test("trimSuffix", () => {
+	expect(trimSuffix("Hello World", "o World")).toBe("Hell");
+	expect(trimSuffix("!@#wow#(*&#/", "w#(*&#/")).toBe("!@#wo");
+
+	expect(trimSuffix("Hello World", " Hello ")).toBe("Hello World");
+	expect(trimSuffix("!@#wow#(*&#/", "(*&#")).toBe("!@#wow#(*&#/");
 });

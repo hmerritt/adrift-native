@@ -8,7 +8,3 @@ export const hasProp = <K extends PropertyKey>(
 ): data is Record<K, unknown> => {
 	return prop in data;
 };
-
-export const isStrArray = (v: unknown): v is string[] => {
-	return Array.isArray(v) && v.every((item) => typeof item === "string");
-};

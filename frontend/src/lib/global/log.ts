@@ -1,7 +1,8 @@
 import dayjs from "dayjs";
 
-import { $global } from "./utils";
 import { padChar } from "lib/strings";
+
+import { $global, setGlobalValue } from "./utils";
 
 // @TODO:
 // export interface Logger {
@@ -82,8 +83,6 @@ const timestampString = (diff: chars, namespace?: string) => {
 };
 
 const _log = (namespace: string, logLevel: any, ...args: any[]) => {
-	if (import.meta.env.MODE === "production") return;
-
 	const timeElapsed = dayjs().diff($global.logStore.getTime(namespace), "millisecond");
 	const stringToLog = timestampString(timeElapsed, namespace);
 	$global.logStore.increment(namespace);
@@ -106,7 +105,7 @@ const _log = (namespace: string, logLevel: any, ...args: any[]) => {
 };
 
 /**
- * log in development only (`NODE_ENV !== "production"`)
+ * log.
  *
  * Adds a timestamp and timediff to each log automatically.
  */
@@ -115,16 +114,36 @@ export const log = (logLevel: any, ...args: any[]) => {
 };
 
 /**
- * Alias for `log`, plus namespaces logs to keep them separate.
+ * Namespaced `log`.
  *
  * @example debug("socket", "msg received") -> "[socket] msg recieved"
  */
-export const debug = (namespace: string, logLevel: any, ...args: any[]) => {
+export const logn = (namespace: string, logLevel: any, ...args: any[]) => {
 	_log(namespace, logLevel, ...args);
+};
+
+/**
+ * Log in development only (`NODE_ENV !== "production"`)
+ */
+export const debug = (logLevel: any, ...args: any[]) => {
+	if (env.isProduction) return;
+	log(logLevel, ...args);
+};
+
+/**
+ * Namespaced `debug`.
+ *
+ * @example debugn("socket", "msg received") -> "[socket] msg recieved"
+ */
+export const debugn = (namespace: string, logLevel: any, ...args: any[]) => {
+	if (env.isProduction) return;
+	logn(namespace, logLevel, ...args);
 };
 
 export const injectLog = () => {
 	$global.logStore = new LogStore();
-	$global.log = log;
-	$global.debug = debug;
+	setGlobalValue("log", log);
+	setGlobalValue("logn", logn);
+	setGlobalValue("debug", debug);
+	setGlobalValue("debugn", debugn);
 };

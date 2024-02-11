@@ -1,3 +1,5 @@
+import { cx } from "@linaria/core";
+
 export type FlexProps = JSX.IntrinsicElements["div"] & {
 	center?: boolean;
 	grow?: boolean;
@@ -16,15 +18,23 @@ export const Flex = ({
 	wrap = false,
 	vc = false,
 	hc = false,
+	className,
 	...rest
 }: FlexProps) => {
-	rest.className = rest?.className ? (rest.className += " flex") : "flex";
-	center && (rest.className += " center");
-	grow && (rest.className += " grow");
-	row && (rest.className += " row");
-	shrink && (rest.className += " shrink");
-	wrap && (rest.className += " wrap");
-	vc && (rest.className += " v-center");
-	hc && (rest.className += " h-center");
-	return <div {...rest} />;
+	return (
+		<div
+			className={cx(
+				className,
+				"flex",
+				center && "center",
+				grow && "grow",
+				row && "row",
+				shrink && "shrink",
+				wrap && "wrap",
+				vc && "v-center",
+				hc && "h-center"
+			)}
+			{...rest}
+		/>
+	);
 };

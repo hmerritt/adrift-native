@@ -15,7 +15,7 @@ jobs:
 
         strategy:
             matrix:
-                node-version: [18.x, 20.x]
+                node-version: [20.x]
                 # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
         steps:
@@ -25,6 +25,9 @@ jobs:
               with:
                   path: ".npm"
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-            - run: yarn install --cache-folder .npm --prefer-offline
+            - run: corepack enable && corepack prepare yarn@stable --activate && yarn set version 3.5.0
+            - run: yarn install
+            - run: yarn test:e2e:setup
             - run: yarn test:coverage
+            - run: yarn test:e2e
             - run: yarn build

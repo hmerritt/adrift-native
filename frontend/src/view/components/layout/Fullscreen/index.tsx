@@ -13,6 +13,7 @@ export const Fullscreen = styled.div<FullscreenProps>`
 	left: 0;
 	width: 100vw;
 	height: 100vh;
+	max-width: 100%;
 	align-items: center;
 	justify-content: center;
 	z-index: ${({ zIndex }: any) => zIndex ?? 0};

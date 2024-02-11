@@ -1,10 +1,12 @@
 package clir
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -23,16 +25,18 @@ type Command struct {
 	flagCount         int
 	helpFlag          bool
 	hidden            bool
+	positionalArgsMap map[string]reflect.Value
 }
 
 // NewCommand creates a new Command
 // func NewCommand(name string, description string, app *Cli, parentCommandPath string) *Command {
 func NewCommand(name string, description string) *Command {
 	result := &Command{
-		name:             name,
-		shortdescription: description,
-		subCommandsMap:   make(map[string]*Command),
-		hidden:           false,
+		name:              name,
+		shortdescription:  description,
+		subCommandsMap:    make(map[string]*Command),
+		hidden:            false,
+		positionalArgsMap: make(map[string]reflect.Value),
 	}
 
 	return result
@@ -71,9 +75,40 @@ func (c *Command) parseFlags(args []string) error {
 	// Parse flags
 	tmp := os.Stderr
 	os.Stderr = nil
-	err := c.flags.Parse(args)
-	os.Stderr = tmp
-	return err
+	defer func() {
+		os.Stderr = tmp
+	}()
+
+	// Credit: https://stackoverflow.com/a/74146375
+	var positionalArgs []string
+	for {
+		if err := c.flags.Parse(args); err != nil {
+			return err
+		}
+		// Consume all the flags that were parsed as flags.
+		args = args[len(args)-c.flags.NArg():]
+		if len(args) == 0 {
+			break
+		}
+		// There's at least one flag remaining and it must be a positional arg since
+		// we consumed all args that were parsed as flags. Consume just the first
+		// one, and retry parsing, since subsequent args may be flags.
+		positionalArgs = append(positionalArgs, args[0])
+		args = args[1:]
+	}
+
+	// Parse just the positional args so that flagset.Args()/flagset.NArgs()
+	// return the expected value.
+	// Note: This should never return an error.
+	err := c.flags.Parse(positionalArgs)
+	if err != nil {
+		return err
+	}
+
+	if len(positionalArgs) > 0 {
+		return c.parsePositionalArgs(positionalArgs)
+	}
+	return nil
 }
 
 // Run - Runs the Command with the given arguments
@@ -215,13 +250,6 @@ func (c *Command) NewSubCommandInheritFlags(name, description string) *Command {
 	return result
 }
 
-// BoolFlag - Adds a boolean flag to the command
-func (c *Command) BoolFlag(name, description string, variable *bool) *Command {
-	c.flags.BoolVar(variable, name, *variable, description)
-	c.flagCount++
-	return c
-}
-
 func (c *Command) AddFlags(optionStruct interface{}) *Command {
 	// use reflection to determine if this is a pointer to a struct
 	// if not, panic
@@ -254,19 +282,94 @@ func (c *Command) AddFlags(optionStruct interface{}) *Command {
 		tag := t.Elem().Field(i).Tag
 		name := tag.Get("name")
 		description := tag.Get("description")
+		defaultValue := tag.Get("default")
+		pos := tag.Get("pos")
+		c.positionalArgsMap[pos] = field
 		if name == "" {
 			name = strings.ToLower(t.Elem().Field(i).Name)
 		}
 		switch field.Kind() {
 		case reflect.Bool:
+			var defaultValueBool bool
+			if defaultValue != "" {
+				var err error
+				defaultValueBool, err = strconv.ParseBool(defaultValue)
+				if err != nil {
+					panic("Invalid default value for bool flag")
+				}
+			}
+			field.SetBool(defaultValueBool)
 			c.BoolFlag(name, description, field.Addr().Interface().(*bool))
 		case reflect.String:
+			if defaultValue != "" {
+				// set value of field to default value
+				field.SetString(defaultValue)
+			}
 			c.StringFlag(name, description, field.Addr().Interface().(*string))
 		case reflect.Int:
+			if defaultValue != "" {
+				// set value of field to default value
+				value, err := strconv.Atoi(defaultValue)
+				if err != nil {
+					panic("Invalid default value for int flag")
+				}
+				field.SetInt(int64(value))
+			}
 			c.IntFlag(name, description, field.Addr().Interface().(*int))
+		case reflect.Int64:
+			if defaultValue != "" {
+				// set value of field to default value
+				value, err := strconv.Atoi(defaultValue)
+				if err != nil {
+					panic("Invalid default value for int flag")
+				}
+				field.SetInt(int64(value))
+			}
+			c.Int64Flag(name, description, field.Addr().Interface().(*int64))
+		case reflect.Uint:
+			if defaultValue != "" {
+				// set value of field to default value
+				value, err := strconv.Atoi(defaultValue)
+				if err != nil {
+					panic("Invalid default value for int flag")
+				}
+				field.SetUint(uint64(value))
+			}
+			c.UintFlag(name, description, field.Addr().Interface().(*uint))
+		case reflect.Uint64:
+			if defaultValue != "" {
+				// set value of field to default value
+				value, err := strconv.Atoi(defaultValue)
+				if err != nil {
+					panic("Invalid default value for int flag")
+				}
+				field.SetUint(uint64(value))
+			}
+			c.UInt64Flag(name, description, field.Addr().Interface().(*uint64))
+		case reflect.Float64:
+			if defaultValue != "" {
+				// set value of field to default value
+				value, err := strconv.ParseFloat(defaultValue, 64)
+				if err != nil {
+					panic("Invalid default value for float flag")
+				}
+				field.SetFloat(value)
+			}
+			c.Float64Flag(name, description, field.Addr().Interface().(*float64))
+		default:
+			if pos != "" {
+				println("WARNING: Unsupported type for flag: ", fieldType.Type.Kind())
+			}
 		}
 	}
 
+	return c
+}
+
+// BoolFlag - Adds a boolean flag to the command
+func (c *Command) BoolFlag(name, description string, variable *bool) *Command {
+	c.flags.BoolVar(variable, name, *variable, description)
+	c.flagCount++
 	return c
 }
 
@@ -280,6 +383,34 @@ func (c *Command) StringFlag(name, description string, variable *string) *Comman
 // IntFlag - Adds an int flag to the command
 func (c *Command) IntFlag(name, description string, variable *int) *Command {
 	c.flags.IntVar(variable, name, *variable, description)
+	c.flagCount++
+	return c
+}
+
+// Int64Flag - Adds an int flag to the command
+func (c *Command) Int64Flag(name, description string, variable *int64) *Command {
+	c.flags.Int64Var(variable, name, *variable, description)
+	c.flagCount++
+	return c
+}
+
+// UintFlag - Adds an int flag to the command
+func (c *Command) UintFlag(name, description string, variable *uint) *Command {
+	c.flags.UintVar(variable, name, *variable, description)
+	c.flagCount++
+	return c
+}
+
+// UInt64Flag - Adds an int flag to the command
+func (c *Command) UInt64Flag(name, description string, variable *uint64) *Command {
+	c.flags.Uint64Var(variable, name, *variable, description)
+	c.flagCount++
+	return c
+}
+
+// Float64Flag - Adds a float64 flag to the command
+func (c *Command) Float64Flag(name, description string, variable *float64) *Command {
+	c.flags.Float64Var(variable, name, *variable, description)
 	c.flagCount++
 	return c
 }
@@ -324,28 +455,6 @@ func (c *Command) NewSubCommandFunction(name string, description string, fn inte
 		panic("NewSubFunction '" + name + "' requires a function with the signature 'func(*struct) error'")
 	}
 	flags := reflect.New(t.In(0).Elem())
-	defaultMethod, ok := t.In(0).MethodByName("Default")
-
-	if ok {
-		// Check the default method has no inputs
-		if defaultMethod.Type.NumIn() != 1 {
-			panic("'Default' method on struct '" + t.In(0).Elem().Name() + "' must have the signature 'Default() *" + t.In(0).Elem().Name() + "'")
-		}
-
-		// Check the default method has a single struct output
-		if defaultMethod.Type.NumOut() != 1 {
-			panic("'Default' method on struct '" + t.In(0).Elem().Name() + "' must have the signature 'Default() *" + t.In(0).Elem().Name() + "'")
-		}
-
-		// Check the default method has a single struct output
-		if defaultMethod.Type.Out(0) != t.In(0) {
-			panic("'Default' method on struct '" + t.In(0).Elem().Name() + "' must have the signature 'Default() *" + t.In(0).Elem().Name() + "'")
-		}
-
-		// Call defaultMethod to get default flags
-		results := defaultMethod.Func.Call([]reflect.Value{flags})
-		flags = results[0]
-	}
 	result.Action(func() error {
 		result := fnValue.Call([]reflect.Value{flags})[0].Interface()
 		if result != nil {
@@ -355,4 +464,44 @@ func (c *Command) NewSubCommandFunction(name string, description string, fn inte
 	})
 	result.AddFlags(flags.Interface())
 	return result
+}
+
+func (c *Command) parsePositionalArgs(args []string) error {
+	for index, posArg := range args {
+		// Check the map for a field for this arg
+		key := strconv.Itoa(index + 1)
+		field, ok := c.positionalArgsMap[key]
+		if !ok {
+			continue
+		}
+		fieldType := field.Type()
+		switch fieldType.Kind() {
+		case reflect.Bool:
+			// set value of field to true
+			field.SetBool(true)
+		case reflect.String:
+			field.SetString(posArg)
+		case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
+			value, err := strconv.ParseInt(posArg, 10, 64)
+			if err != nil {
+				return err
+			}
+			field.SetInt(value)
+		case reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8, reflect.Uint:
+			value, err := strconv.ParseUint(posArg, 10, 64)
+			if err != nil {
+				return err
+			}
+			field.SetUint(value)
+		case reflect.Float64, reflect.Float32:
+			value, err := strconv.ParseFloat(posArg, 64)
+			if err != nil {
+				return err
+			}
+			field.SetFloat(value)
+		default:
+			return errors.New("Unsupported type for positional argument: " + fieldType.Name())
+		}
+	}
+	return nil
 }

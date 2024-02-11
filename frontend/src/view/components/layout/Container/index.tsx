@@ -14,14 +14,20 @@ export const Container = ({
 	width = "1320px",
 	...props
 }: ContainerProps) => {
-	style = { ...style, padding, maxWidth: width };
-	return <div className={cx(container, className)} style={style} {...props} />;
+	return (
+		<div
+			className={cx(container, className)}
+			style={{ ...style, padding, maxWidth: width }}
+			{...props}
+		/>
+	);
 };
 
 const container = css`
 	position: relative;
 	width: 100%;
-	margin: auto;
+	margin-left: auto;
+	margin-right: auto;
 	padding: 0 2rem;
 
 	@media screen and (max-width: 768px) {
