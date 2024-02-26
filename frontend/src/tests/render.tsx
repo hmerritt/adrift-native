@@ -8,14 +8,14 @@ import { createTestRouter } from "./utils";
 
 export type Element = ReactElement<any, string | JSXElementConstructor<any>>;
 
-type Children = {
-	children: Element;
-};
+type WrapperType = JSXElementConstructor<{
+	children: React.ReactNode;
+}>;
 
 const internalTestId = "__routerHasMounted";
 
 export const render = async (ui: Element, skipWaitFor = false) => {
-	const Wrapper = ({ children }: Children) => {
+	const Wrapper: WrapperType = ({ children }) => {
 		return (
 			<Provider store={store}>
 				<RouterProvider
@@ -39,7 +39,7 @@ export const render = async (ui: Element, skipWaitFor = false) => {
 };
 
 export const renderBasic = async (ui: Element, skipWaitFor = false) => {
-	const Wrapper = ({ children }: Children) => {
+	const Wrapper: WrapperType = ({ children }) => {
 		return (
 			<Provider store={store}>
 				<div data-testid={internalTestId}>{children}</div>

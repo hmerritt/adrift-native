@@ -1,4 +1,4 @@
-import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
+import { type Action, type ThunkAction, configureStore } from "@reduxjs/toolkit";
 import { createLogger } from "redux-logger";
 
 import rootReducer from "./reducers";

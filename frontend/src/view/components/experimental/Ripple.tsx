@@ -169,7 +169,7 @@ export const Ripple = ({
 
 			return () => clearTimeout(reset);
 		},
-		[centered, onTouchStart]
+		[centered, onMouseDown, onTouchStart]
 	);
 
 	const handleEnd = useCallback(
@@ -189,7 +189,7 @@ export const Ripple = ({
 				});
 			});
 		},
-		[onTouchEnd]
+		[onMouseUp, onTouchEnd]
 	);
 
 	return (

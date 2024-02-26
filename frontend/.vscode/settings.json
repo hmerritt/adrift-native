@@ -5,6 +5,7 @@
 	"[typescript]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
+	"eslint.workingDirectories": ["src"],
 	"scss.format.spaceAroundSelectorSeparator": true,
 	"search.useIgnoreFiles": true
 }

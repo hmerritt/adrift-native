@@ -44,7 +44,7 @@ export const FrostedGlass: React.FC<FrostedGlassProps> = ({
 				: $div.current?.clientHeight / paneMaxHeight;
 
 		setPaneCount(Math.floor(paneCalc) || paneInitialCount);
-	}, [paneInitialCount, paneMaxWidth]);
+	}, [paneDirection, paneInitialCount, paneMaxHeight, paneMaxWidth]);
 
 	useEffect(() => {
 		calculatePaneCount();

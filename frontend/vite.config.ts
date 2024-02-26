@@ -1,9 +1,9 @@
-// @ts-nocheck
 import { TanStackRouterVite } from "@tanstack/router-vite-plugin";
 import react from "@vitejs/plugin-react";
 import { injectManifest } from "rollup-plugin-workbox";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+import type { UserConfig as VitestUserConfig } from "vitest/config";
 
 import linaria from "./config/linaria-rollup";
 
@@ -19,17 +19,13 @@ export default defineConfig({
 		"process.env": {}
 	},
 	plugins: [
-		react({
-			// jsxRuntime: "classic",
-			babelrc: true
-		}),
+		react(),
 		tsconfigPaths(),
 		TanStackRouterVite({
 			routesDirectory: "src/view/routes"
 		}),
 		linaria({
 			sourceMap: isDev,
-			extension: ".scss",
 			preprocessor: "none",
 			exclude: ["src/global/**", "**/*.test.{ts,tsx}"],
 			include: ["**/*.{ts,tsx}"]

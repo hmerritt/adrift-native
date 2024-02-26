@@ -5,7 +5,7 @@ import { isMobile } from "react-device-detect";
 import { useEventListener } from "lib/hooks";
 
 export type HaloProps = JSX.IntrinsicElements["div"];
-export type HaloProvider = {
+export type HaloProviderProps = {
 	children: React.ReactNode;
 	staticForMobile?: boolean;
 	gradient?: {
@@ -37,7 +37,7 @@ export const HaloProvider = ({
 	children,
 	staticForMobile = false,
 	gradient
-}: HaloProvider) => {
+}: HaloProviderProps) => {
 	const state = useRef({ x: 0, y: 0, stopUpdates: false });
 
 	const { size, halo, background } = {

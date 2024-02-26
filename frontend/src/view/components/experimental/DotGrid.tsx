@@ -80,8 +80,8 @@ export const DotGrid: React.FC<DotGridProps> = ({
 		}[] = [];
 
 		// Initialize dots array
-		for (let x = 0; x < canvas.width; x += spacing) {
-			for (let y = 0; y < canvas.height; y += spacing) {
+		for (let x = Math.round(spacing / 2); x < canvas.width; x += spacing) {
+			for (let y = Math.round(spacing / 2); y < canvas.height; y += spacing) {
 				dots.push({
 					x: x,
 					y: y,

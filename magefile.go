@@ -38,7 +38,7 @@ func Build() error {
 		"-ldflags",
 		"-s -w",
 		// "-nsis", // Builds a Windows installer
-		// "-upx" // Binary compression
+		"-upx", // Binary compression
 	)
 
 	// @TODO: Zip the binary for release?

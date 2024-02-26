@@ -53,7 +53,7 @@ export const Noise = ({
 	size = 256,
 	alpha = 25,
 	reactToWindowResize = true
-}) => {
+}: NoiseProps) => {
 	const $canvas = useRef<HTMLCanvasElement>(null);
 
 	useEffect(() => {
@@ -87,7 +87,7 @@ export const Noise = ({
 			loopRunning.current = false;
 			window.removeEventListener("resize", () => canvasResize(canvas, size));
 		};
-	}, [framerate, reactToWindowResize]);
+	}, [alpha, framerate, reactToWindowResize, size]);
 
 	return <canvas ref={$canvas} className={canvasStyle} />;
 };
