@@ -31,7 +31,7 @@ func main() {
 		MinHeight:         400,
 		DisableResize:     false,
 		Fullscreen:        false,
-		Frameless:         false,
+		Frameless:         true,
 		StartHidden:       false,
 		HideWindowOnClose: false,
 		// BackgroundColour:  &options.RGBA{R: 255, G: 255, B: 255, A: 255},
@@ -46,6 +46,8 @@ func main() {
 		OnBeforeClose:    app.beforeClose,
 		OnShutdown:       app.shutdown,
 		WindowStartState: options.Normal,
+		CSSDragProperty:  "--runtime-draggable",
+		CSSDragValue:     "drag",
 		Bind: []interface{}{
 			app,
 		},

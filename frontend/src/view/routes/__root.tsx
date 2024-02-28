@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-router";
 import { lazy } from "react";
 
-import { DotGrid, Icon } from "view/components";
+import { DotGrid, FramelessControls, Icon } from "view/components";
 
 const TanStackRouterDevtools =
 	env.isDevelopment && env.showDevTools
@@ -35,6 +35,8 @@ function RootRoute() {
 			<Outlet />
 			{/* Router dev tools */}
 			<TanStackRouterDevtools />
+
+			<FramelessControls />
 		</div>
 	);
 }
