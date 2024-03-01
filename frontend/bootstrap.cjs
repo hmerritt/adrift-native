@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const core = require("./scripts/bootstrap/core.cjs");
+const { adriftVersion, isAdriftUpdateAvailable } = require("./scripts/bootstrap/version.cjs");
 const packageJSON = require("./package.json");
 
 const path = __dirname;
@@ -18,30 +19,33 @@ async function bootstrap() {
 	const appVersion = packageJSON?.version;
 	const appName = packageJSON?.name;
 
+	// Checks GitHub for any adrift updates.
+	const checkForAdriftUpdate = false;
+
 	// When true, the env array below can be overridden by whatever is in the environment at runtime.
 	const allowEnvOverride = true;
 
 	// Set ENV array to inject, key/value
 	const env = [
-		["NODE_ENV", "development"],
-		["GENERATE_SOURCEMAP", false],
+		["NODE_ENV", core.getNodeEnv(args)],
+		["GENERATE_SOURCEMAP", core.getNodeEnv(args) === "development"],
+		["VITE_ADRIFT_VERSION", adriftVersion],
 		["VITE_NAME", appName],
 		["VITE_VERSION", appVersion],
 		["VITE_GIT_BRANCH", gitBranch],
 		["VITE_GIT_COMMIT", gitCommitHashShort],
-		['VITE_PLAUSIBLE_ENABLE', false],
-		['VITE_PLAUSIBLE_DOMAIN', 'mrrtt.me'],
-		['VITE_PLAUSIBLE_API_HOST', 'https://plausible.mrrtt.me']
+		// ['VITE_PLAUSIBLE_ENABLE', true],
+		// ['VITE_PLAUSIBLE_DOMAIN', 'PLAUSIBLE_DOMAIN'],
+		// ['VITE_PLAUSIBLE_API_HOST', 'https://plausible.io']
 	];
 
-	const isProd = args.length >= 2 && (args[1] === "build" || args[1] === "preview");
-	if (isProd) env[0][1] = "production";
-
-	const isTest = args.length >= 1 && args[0] === "vitest";
-	if (isTest) env[0][1] = "test";
-
 	// Log app name and version info
-	console.log(`${core.versionString(appName, appVersion, gitBranch, gitCommitHashShort)}\n`);
+	console.log(core.versionString(appName, appVersion, gitBranch, gitCommitHashShort), "\n");
+
+	const update = await isAdriftUpdateAvailable();
+	if (checkForAdriftUpdate && update) {
+		console.log(`\x1b[33m`, `-> adrift update available! (${adriftVersion} - ${update})`, `\x1b[0m`, '\n');
+	}
 
 	// Run bootstrap script
 	core.bootstrap(env, allowEnvOverride, args, path);

@@ -15,6 +15,7 @@ export const env = Object.freeze({
 	appVersion: import.meta.env.VITE_VERSION,
 	gitBranch: import.meta.env.VITE_GIT_BRANCH,
 	gitCommitHash: import.meta.env.VITE_GIT_COMMIT,
+	adriftVersion: import.meta.env.VITE_ADRIFT_VERSION,
 	showDevTools: parseEnv(import.meta.env.VITE_SHOW_DEVTOOLS) || true,
 	plausible: {
 		enable: parseEnv(import.meta.env.VITE_PLAUSIBLE_ENABLE),

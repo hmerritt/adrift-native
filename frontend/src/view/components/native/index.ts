@@ -1,1 +1,1 @@
-export * from "./frameless-controls";
+export * from "./WindowControls";
