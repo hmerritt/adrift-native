@@ -2,6 +2,8 @@ module github.com/hmerritt/adrift-native
 
 go 1.22
 
+toolchain go1.22.0
+
 require (
 	github.com/magefile/mage v1.15.0
 	github.com/wailsapp/wails/v2 v2.8.0
