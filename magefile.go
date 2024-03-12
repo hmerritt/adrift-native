@@ -8,30 +8,9 @@ import (
 )
 
 func Bootstrap() error {
-	RunSync([][]string{
-		{"go", "mod", "vendor"},
-	})
-
-	deps := []string{
-		"mvdan.cc/garble@latest",
-		"gotest.tools/gotestsum",
-		"github.com/magefile/mage",
-		"github.com/wailsapp/wails/v2/cmd/wails",
-	}
-
-	for _, dep := range deps {
-		err := RunSync([][]string{
-			{"go", "get", dep},
-			{"go", "install", dep},
-		})
-
-		if err != nil {
-			return err
-		}
-	}
-
 	return RunSync([][]string{
 		{"go", "mod", "vendor"},
+		{"go", "mod", "tidy"},
 		{"go", "generate", "-tags", "tools", "tools/tools.go"},
 	})
 }

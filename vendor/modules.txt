@@ -97,8 +97,6 @@ github.com/bep/debounce
 # github.com/bitfield/gotestdox v0.2.2
 ## explicit; go 1.18
 github.com/bitfield/gotestdox
-# github.com/bluekeyes/go-gitdiff v0.7.1
-## explicit; go 1.13
 # github.com/charmbracelet/glamour v0.6.0
 ## explicit; go 1.13
 github.com/charmbracelet/glamour
@@ -627,5 +625,3 @@ gotest.tools/gotestsum/testjson
 # howett.net/plist v1.0.1
 ## explicit; go 1.12
 howett.net/plist
-# mvdan.cc/garble v0.12.1
-## explicit; go 1.21
