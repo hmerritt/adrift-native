@@ -28,7 +28,6 @@ func Bootstrap() error {
 
 	return RunSync([][]string{
 		{"go", "generate", "-tags", "tools", "tools/tools.go"},
-		{"go", "mod", "download"},
 	})
 }
 
@@ -51,7 +50,7 @@ func Test() error {
 	// Runs both Go, and frontend tests
 	return RunSync([][]string{
 		{"gotestsum", "--format", "pkgname", "--", "--cover", "./..."},
-		{"yarn", "--cwd", "frontend", "test"},
+		{"yarn", "--cwd", "frontend", "test:coverage"},
 	})
 }
 
