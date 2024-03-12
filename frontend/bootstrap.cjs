@@ -3,7 +3,7 @@ const core = require("./scripts/bootstrap/core.cjs");
 const { adriftVersion, isAdriftUpdateAvailable } = require("./scripts/bootstrap/version.cjs");
 const packageJSON = require("./package.json");
 
-const path = __dirname;
+const pathRoot = __dirname;
 const args = process.argv.slice(2);
 
 // Run bootrap
@@ -13,14 +13,14 @@ bootstrap();
 // Run anything you like, here we get the app version from the package.json + the current commit hash.
 // prettier-ignore
 async function bootstrap() {
-	const gitCommitHash = await core.run(`git rev-parse HEAD`, path, '');
+	const gitCommitHash = await core.run(`git rev-parse HEAD`, pathRoot, '');
 	const gitCommitHashShort = gitCommitHash ? core.shorten(gitCommitHash) : '';
-	const gitBranch = await core.getGitBranch(path);
+	const gitBranch = await core.getGitBranch(pathRoot);
 	const appVersion = packageJSON?.version;
 	const appName = packageJSON?.name;
 
 	// Checks GitHub for any adrift updates.
-	const checkForAdriftUpdate = false;
+	const checkForAdriftUpdate = true;
 
 	// When true, the env array below can be overridden by whatever is in the environment at runtime.
 	const allowEnvOverride = true;
@@ -48,5 +48,5 @@ async function bootstrap() {
 	}
 
 	// Run bootstrap script
-	core.bootstrap(env, allowEnvOverride, args, path);
+	core.bootstrap(env, allowEnvOverride, args, pathRoot);
 }

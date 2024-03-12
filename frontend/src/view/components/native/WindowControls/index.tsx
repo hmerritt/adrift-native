@@ -1,6 +1,8 @@
 import { css, cx } from "@linaria/core";
 import { FC } from "react";
 
+import { Ripple } from "view/components/experimental";
+
 import { MacClose, MacMaximize, MacMinimize } from "./icons";
 
 export type WindowControlsProps = {
@@ -25,19 +27,25 @@ export const WindowControls: FC<WindowControlsProps> = ({
 		// @TODO Icons - separate icons for mac and windows?
 		<div className={controls}>
 			{onClose && (
-				<div className={cx(controlMac, controlMacClose)} onClick={onClose}>
+				<Ripple className={cx(controlMac, controlMacClose)} onClick={onClose}>
 					<MacClose />
-				</div>
+				</Ripple>
 			)}
 			{onMinimize && (
-				<div className={cx(controlMac, controlMacMinimize)} onClick={onMinimize}>
+				<Ripple
+					className={cx(controlMac, controlMacMinimize)}
+					onClick={onMinimize}
+				>
 					<MacMinimize />
-				</div>
+				</Ripple>
 			)}
 			{onMaximize && (
-				<div className={cx(controlMac, controlMacMaximize)} onClick={onMaximize}>
+				<Ripple
+					className={cx(controlMac, controlMacMaximize)}
+					onClick={onMaximize}
+				>
 					<MacMaximize />
-				</div>
+				</Ripple>
 			)}
 		</div>
 	);
@@ -49,7 +57,7 @@ const controls = css`
 	flex-direction: row;
 	align-items: center;
 	justify-content: center;
-	gap: 0.9rem;
+	gap: 1rem;
 	--runtime-draggable: drag;
 `;
 
@@ -64,8 +72,9 @@ const controlMac = css`
 
 	svg {
 		opacity: 0;
-		width: 1.2rem;
-		height: 1.2rem;
+		width: 1.1rem;
+		height: 1.1rem;
+		transition: opacity 150ms ease-in-out;
 	}
 
 	&:hover svg {

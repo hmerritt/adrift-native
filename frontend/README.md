@@ -6,7 +6,7 @@ Template react app with batteries included 🔋
 -   [Vitest (testing for Vite)](https://vitest.dev/)
 -   [Playwright (testing end-to-end)](https://playwright.dev)
 -   [Typescript](https://www.typescriptlang.org)
--   [Redux](https://redux.js.org)
+-   [TanStack Store](https://tanstack.com/store/latest)
 -   [TanStack Router](https://tanstack.com/router/latest)
 -   [Linaria (SASS-in-JS)](https://github.com/callstack/linaria)
 -   Custom (hackable) build script
@@ -17,6 +17,12 @@ Template react app with batteries included 🔋
 > Checkout [Adrift Native](https://github.com/hmerritt/adrift-native) to run Adrift apps natively on Windows, Mac, and Linux.
 
 ## Getting started
+
+**_Quick start_**, get up an running in one command:
+
+```bash
+git clone https://github.com/hmerritt/adrift && cd adrift && yarn && yarn dev
+```
 
 Clone this repo and run one of the following scripts:
 

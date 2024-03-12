@@ -1,8 +1,15 @@
-import type { AppDispatch } from "state";
-import * as types from "./countReducer";
+import { updateSlice } from "state/index";
 
 export const countIncrement = (incrementAmount = 0.1) => {
-	return (dispatch: AppDispatch) => {
-		dispatch({ type: types.COUNT_INCREMENT, payload: incrementAmount });
-	};
+	updateSlice("count", (count) => {
+		count.current = Number(
+			(Number(count.current) + Number(incrementAmount)).toFixed(2)
+		);
+	});
+};
+
+export const countReset = () => {
+	updateSlice("count", (count) => {
+		count.current = 0;
+	});
 };

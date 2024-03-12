@@ -3,7 +3,47 @@
 /**
  * Internal adrift version.
  */
-const adriftVersion = "0.10.443";
+const adriftVersion = "0.11.462";
+
+/**
+ * Bumps the adrift `patch` version number using the total commit count.
+ * 
+ * Directly changes the above variable `adriftVersion` (by overwriting this file).
+ */
+async function bumpAdriftPatchVersion() {
+	try {
+		const fs = require('fs');
+		const path = require('path');
+		const core = require("./core.cjs");
+		const pathRoot = path.dirname(path.dirname(__dirname));
+
+		// Get the total commit count
+		const commitCount = (await core.run(`git rev-list --count HEAD`, pathRoot, '')).trim();
+
+		// Read the contents of version.cjs
+		const versionFile = path.join(__dirname, 'version.cjs');
+		const versionFileContent = fs.readFileSync(versionFile, 'utf8');
+
+		// Extract the version number parts
+		const versionMatch = versionFileContent.match(/(const adriftVersion = ")(\d+\.\d+\.)(\d+)(")/);
+		const majorMinor = versionMatch?.[2];
+		const newVersion = `${majorMinor}${commitCount}`;
+
+		if (!majorMinor) {
+			throw new Error('No version number found in version.cjs');
+		}
+
+		// Replace the version patch with the commit count
+		const updatedContent = versionFileContent.replace(/(const adriftVersion = ")(\d+\.\d+\.)\d+(")/g, `$1${newVersion}$3`);
+
+		// Write the updated content back to version.cjs
+		fs.writeFileSync(versionFile, updatedContent, 'utf8');
+
+		console.log(`\x1b[36madrift@${newVersion}\x1b[0m`);
+	} catch (error) {
+		console.error("\x1b[31mError bumping adrift patch version:", error, `\x1b[0m`);
+	}
+}
 
 /**
  * Checks with latest GitHub release to see if there is an update.
@@ -42,4 +82,4 @@ async function isAdriftUpdateAvailable() {
 	return false;
 }
 
-module.exports = { adriftVersion, isAdriftUpdateAvailable };
+module.exports = { adriftVersion, bumpAdriftPatchVersion, isAdriftUpdateAvailable };
