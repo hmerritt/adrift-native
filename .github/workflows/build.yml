@@ -46,6 +46,7 @@ jobs:
               run: |
                   go install github.com/magefile/mage
                   mage -v bootstrap
+                  mage -v build
 
             # - name: Upload Go binary
             #   uses: actions/upload-artifact@v2
