@@ -42,8 +42,6 @@ func Build() error {
 	return sh.Run(
 		"wails",
 		"build",
-		"-platform",
-		"windows/amd64,darwin/universal,linux/amd64",
 		"-ldflags",
 		"-s -w",
 		// "-nsis", // Builds a Windows installer
