@@ -8,6 +8,10 @@ import (
 )
 
 func Bootstrap() error {
+	RunSync([][]string{
+		{"go", "mod", "vendor"},
+	})
+
 	deps := []string{
 		"mvdan.cc/garble@latest",
 		"gotest.tools/gotestsum",
@@ -27,6 +31,7 @@ func Bootstrap() error {
 	}
 
 	return RunSync([][]string{
+		{"go", "mod", "vendor"},
 		{"go", "generate", "-tags", "tools", "tools/tools.go"},
 	})
 }

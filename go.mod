@@ -25,6 +25,7 @@ require (
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/bitfield/gotestdox v0.2.2 // indirect
+	github.com/bluekeyes/go-gitdiff v0.7.1 // indirect
 	github.com/charmbracelet/glamour v0.6.0 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/containerd/console v1.0.4 // indirect
@@ -111,4 +112,5 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	howett.net/plist v1.0.1 // indirect
+	mvdan.cc/garble v0.12.1 // indirect
 )
