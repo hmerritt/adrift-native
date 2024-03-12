@@ -1,8 +1,6 @@
 import { RouterProvider } from "@tanstack/react-router";
 import { render as reactRender, waitFor } from "@testing-library/react";
 import { JSXElementConstructor, ReactElement } from "react";
-import { Provider } from "react-redux";
-import store from "state";
 
 import { createTestRouter } from "./utils";
 
@@ -17,13 +15,11 @@ const internalTestId = "__routerHasMounted";
 export const render = async (ui: Element, skipWaitFor = false) => {
 	const Wrapper: WrapperType = ({ children }) => {
 		return (
-			<Provider store={store}>
-				<RouterProvider
-					router={createTestRouter(
-						<div data-testid={internalTestId}>{children}</div>
-					)}
-				/>
-			</Provider>
+			<RouterProvider
+				router={createTestRouter(
+					<div data-testid={internalTestId}>{children}</div>
+				)}
+			/>
 		);
 	};
 
@@ -40,11 +36,7 @@ export const render = async (ui: Element, skipWaitFor = false) => {
 
 export const renderBasic = async (ui: Element, skipWaitFor = false) => {
 	const Wrapper: WrapperType = ({ children }) => {
-		return (
-			<Provider store={store}>
-				<div data-testid={internalTestId}>{children}</div>
-			</Provider>
-		);
+		return <div data-testid={internalTestId}>{children}</div>;
 	};
 
 	const r = reactRender(ui, { wrapper: Wrapper });

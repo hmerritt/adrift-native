@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	MODULE_NAME = "changeme" // go.mod module name
+	MODULE_NAME = "github.com/hmerritt/adrift-native" // go.mod module name
 )
 
 //

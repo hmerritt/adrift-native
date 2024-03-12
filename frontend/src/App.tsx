@@ -1,7 +1,4 @@
 import { ErrorComponent, RouterProvider, createRouter } from "@tanstack/react-router";
-import { Provider as Redux } from "react-redux";
-
-import store from "state/index";
 
 import { HaloProvider } from "view/components";
 
@@ -22,11 +19,9 @@ declare module "@tanstack/react-router" {
 
 function App() {
 	return (
-		<Redux store={store}>
-			<HaloProvider>
-				<RouterProvider router={router} defaultPreload="intent" context={{}} />
-			</HaloProvider>
-		</Redux>
+		<HaloProvider>
+			<RouterProvider router={router} defaultPreload="intent" context={{}} />
+		</HaloProvider>
 	);
 }
 

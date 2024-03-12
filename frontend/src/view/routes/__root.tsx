@@ -1,3 +1,4 @@
+import { css } from "@linaria/core";
 import {
 	Outlet,
 	createRootRouteWithContext,
@@ -6,6 +7,7 @@ import {
 import { lazy } from "react";
 
 import { DotGrid, Icon } from "view/components";
+import { WindowControls } from "view/components/native";
 
 const TanStackRouterDevtools =
 	env.isDevelopment && env.showDevTools
@@ -35,6 +37,14 @@ function RootRoute() {
 			<Outlet />
 			{/* Router dev tools */}
 			<TanStackRouterDevtools />
+
+			<div className={controlsWrapper}>
+				<WindowControls
+					onClose={() => (window as any)?.runtime?.Quit()}
+					onMinimize={() => (window as any)?.runtime?.WindowMinimise()}
+					onMaximize={() => (window as any)?.runtime?.WindowToggleMaximise()}
+				/>
+			</div>
 		</div>
 	);
 }
@@ -54,3 +64,11 @@ export function NotFoundRoute() {
 		</div>
 	);
 }
+
+const controlsWrapper = css`
+	position: fixed;
+	top: 0;
+	right: 0;
+	z-index: 9999;
+	padding: 1.5rem;
+`;

@@ -24,7 +24,8 @@ enum ConsoleFunctions {
 	trace = "trace",
 	warn = "warn",
 	group = "group",
-	groupEnd = "groupEnd"
+	groupEnd = "groupEnd",
+	groupCollapsed = "groupCollapsed"
 }
 
 type chars = string | number;

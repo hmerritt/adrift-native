@@ -8,13 +8,43 @@ import (
 )
 
 func Bootstrap() error {
+	deps := []string{
+		"mvdan.cc/garble@latest",
+		"gotest.tools/gotestsum",
+		"github.com/magefile/mage",
+		"github.com/wailsapp/wails/v2/cmd/wails",
+	}
+
+	for _, dep := range deps {
+		err := RunSync([][]string{
+			{"go", "get", dep},
+			{"go", "install", dep},
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+
 	return RunSync([][]string{
-		{"go", "get", "github.com/wailsapp/wails/v2/cmd/wails"},
-		{"go", "get", "github.com/magefile/mage"},
-		{"go", "get", "gotest.tools/gotestsum"},
 		{"go", "generate", "-tags", "tools", "tools/tools.go"},
 		{"go", "mod", "download"},
 	})
+}
+
+func UpdateDeps() error {
+	return RunSync([][]string{
+		{"go", "get", "-u", "all"},
+		{"go", "mod", "vendor"},
+		{"go", "mod", "tidy"},
+	})
+}
+
+func Dev() error {
+	return sh.Run("wails", "dev")
+}
+func Start() error {
+	return sh.Run("wails", "dev")
 }
 
 func Test() error {
@@ -23,10 +53,6 @@ func Test() error {
 		{"gotestsum", "--format", "pkgname", "--", "--cover", "./..."},
 		{"yarn", "--cwd", "frontend", "test"},
 	})
-}
-
-func Dev() error {
-	return sh.Run("wails", "dev")
 }
 
 func Build() error {
@@ -40,6 +66,4 @@ func Build() error {
 		// "-nsis", // Builds a Windows installer
 		"-upx", // Binary compression
 	)
-
-	// @TODO: Zip the binary for release?
 }

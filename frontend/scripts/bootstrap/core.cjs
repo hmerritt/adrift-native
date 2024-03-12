@@ -3,29 +3,7 @@ const util = require("util");
 const exec = require("child_process").exec;
 const execAwait = util.promisify(exec);
 
-/**
- * Validate args
- * @note CURRENTLY NOT IN USE
- */
-function getArgScript() {
-	// CLI args
-	const args = process.argv.slice(2);
-
-	// Bootstap commands (react-start build | start | test)
-	const scriptIndex = args.findIndex(
-		(x) => x === "build" || x === "start" || x === "test"
-	);
-	let script = scriptIndex === -1 ? args[0] : args[scriptIndex];
-
-	if (scriptIndex === -1) {
-		script = "build";
-		console.warn("WARN: Invalid command (expects build | start | test)");
-		console.warn('WARN: Falling back to "build" command');
-		console.warn("");
-	}
-
-	return [script, args.slice(1)];
-}
+const { adriftVersion } = require("./version.cjs");
 
 /**
  * Bootstrap runs code before react start/build.
@@ -177,6 +155,30 @@ function runStream(command, path = __dirname, exitOnError = true) {
 	});
 }
 
+function isProd(args) {
+	return args.length >= 2 && (args[1] === "build" || args[1] === "preview");
+}
+
+function isTest(args) {
+	return args.length >= 1 && args[0] === "vitest";
+}
+
+/**
+ * Determine `NODE_ENV` from args passed to the script.
+ * 
+ * @returns `NODE_ENV` value
+ */
+function getNodeEnv(args) {
+	switch (true) {
+		case isProd(args):
+			return "production";
+		case isTest(args):
+			return "test";
+		default:
+			return "development";
+	}
+}
+
 /**
  * Returns version string including app name, version, git branch, and commit hash.
  * 
@@ -203,6 +205,8 @@ const versionString = (appName = undefined, appVersion = undefined, gitBranch = 
 
 	versionString += `]`;
 
+	if (adriftVersion) versionString += ` with \x1b[36madrift@${adriftVersion}\x1b[0m`;
+
 	return versionString;
 };
 
@@ -210,11 +214,11 @@ const versionString = (appName = undefined, appVersion = undefined, gitBranch = 
 module.exports = {
 	bootstrap,
 	buildENV,
-	getArgScript,
 	getGitBranch,
 	overrideHardcodedENV,
 	run,
 	runStream,
 	shorten,
+	getNodeEnv,
 	versionString
 };
