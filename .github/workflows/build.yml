@@ -24,7 +24,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - name: Setup app
+            - name: App core Setup
               uses: ./.github/actions/core-setup
 
             - name: Test app
@@ -50,6 +50,8 @@ jobs:
         runs-on: ${{ matrix.build.os }}
         steps:
             - uses: actions/checkout@v4
+
+            - name: App core Setup
               uses: ./.github/actions/core-setup
 
             - name: Build app

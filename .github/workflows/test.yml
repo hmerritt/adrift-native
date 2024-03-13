@@ -32,7 +32,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - name: Setup
+            - name: App core Setup
               uses: ./.github/actions/core-setup
 
             - name: Test app
