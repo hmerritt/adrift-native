@@ -64,6 +64,7 @@ jobs:
 
             - name: Set binary variables
               id: binary_variables
+              shell: bash
               run: |
                   case "${{ runner.os }}" in
                     Linux)
