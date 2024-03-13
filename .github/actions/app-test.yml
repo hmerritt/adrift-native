@@ -1,0 +1,17 @@
+name: App test
+description: Run both Go and frontend tests.
+
+runs:
+    using: 'composite'
+    steps:
+        - name: Test frontend
+          run: |
+              cd frontend
+              yarn install
+              yarn test:coverage
+              yarn build
+
+        - name: Test app
+          run: |
+              mage -v test
+              mage -v build

@@ -10,6 +10,9 @@ on:
         branches:
             - '*'
 
+# env:
+#     MATRIX_OS: ubuntu-latest windows-latest macos-latest
+
 jobs:
     test:
         strategy:
@@ -32,7 +35,8 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
+            - name: Setup app
+              uses: ./.github/actions/core-setup.yml
+
             - name: Test app
-              uses: ./.github/workflows/core-test.yml
-              with:
-                  os: ${{ matrix.build.os }}
+              uses: ./.github/actions/app-test.yml

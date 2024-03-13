@@ -27,10 +27,11 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
+            - name: Setup app
+              uses: ./.github/actions/core-setup.yml
+
             - name: Test app
-              uses: ./.github/workflows/core-test.yml
-              with:
-                  os: ${{ matrix.build.os }}
+              uses: ./.github/actions/app-test.yml
     build:
         needs: test
         strategy:
@@ -54,9 +55,7 @@ jobs:
             - uses: actions/checkout@v4
 
             - name: Setup app
-              uses: ./.github/workflows/core-setup.yml
-              with:
-                  os: ${{ matrix.build.os }}
+              uses: ./.github/actions/core-setup.yml
 
             - name: Build app
               run: |
