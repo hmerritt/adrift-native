@@ -2,30 +2,19 @@ name: Core test
 
 on:
     workflow_call:
+        inputs:
+            os:
+                required: true
+                type: string
 
 jobs:
     core_test:
-        strategy:
-            fail-fast: false
-            matrix:
-                build:
-                    - name: core_test
-                      platform: linux/amd64
-                      os: ubuntu-latest
-                    - name: core_test
-                      platform: windows/amd64
-                      os: windows-latest
-                    - name: core_test
-                      platform: darwin/universal
-                      os: macos-latest
-        runs-on: ${{ matrix.build.os }}
+        runs-on: ${{ inputs.os }}
         steps:
-            - uses: actions/checkout@v4
-
             - name: Setup app
               uses: ./.github/workflows/core-setup.yml
               with:
-                  os: ${{ matrix.os }}
+                  os: ${{ inputs.os }}
 
             - name: Test frontend
               run: |

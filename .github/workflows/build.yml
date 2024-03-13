@@ -7,7 +7,30 @@ on:
 
 jobs:
     test:
-        uses: ./.github/workflows/core-test.yml
+        strategy:
+            fail-fast: false
+            matrix:
+                build:
+                    - name: app_test
+                      platformShort: linux
+                      platform: linux/amd64
+                      os: ubuntu-latest
+                    - name: app_test
+                      platformShort: windows
+                      platform: windows/amd64
+                      os: windows-latest
+                    - name: app_test
+                      platformShort: darwin
+                      platform: darwin/universal
+                      os: macos-latest
+        runs-on: ${{ matrix.build.os }}
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Test app
+              uses: ./.github/workflows/core-test.yml
+              with:
+                  os: ${{ matrix.build.os }}
     build:
         needs: test
         strategy:
@@ -33,7 +56,7 @@ jobs:
             - name: Setup app
               uses: ./.github/workflows/core-setup.yml
               with:
-                  os: ${{ matrix.os }}
+                  os: ${{ matrix.build.os }}
 
             - name: Build app
               run: |

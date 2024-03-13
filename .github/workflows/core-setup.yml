@@ -15,8 +15,6 @@ jobs:
     core_setup:
         runs-on: ${{ inputs.os }}
         steps:
-            - uses: actions/checkout@v4
-
             - name: Install Linux packages
               if: runner.os == 'Linux'
               run: |
