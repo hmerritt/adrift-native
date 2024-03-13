@@ -2,15 +2,27 @@
 
 [Adrift](https://github.com/hmerritt/adrift) is a template for React apps with batteries included.
 
-Adrift Native can run your apps _natively_ as a Windows and Mac app (outside the browser as a standalone app).
+Adrift Native can run your apps _natively_ as a Windows, Linux and/or MacOS app (outside the browser as a standalone app).
 
 Initial binary size (for Windows) is less-than 10MB, and as low as **3MB** when compressed with [upx](https://upx.github.io/).
+
+## Features
+
+-   ⚡ [Wails](https://wails.io/) template - build cross-platform native apps with Go + WebView
+-   🌊 [Adrift](https://github.com/hmerritt/adrift) template for frontend
+-   🏋️ CI/CD ([Github Actions](./.github/workflows/build.yml)) to test, compile, and release for Windows, Linux, and MacOS
+
+## Screenshot
 
 ![](https://imgur.com/b1IxXg9.gif)
 
 ## Getting started
 
-Quickstart by building the app yourself:
+**_Quick start_**, get up an running in one command:
+
+```bash
+git clone https://github.com/hmerritt/adrift-native && cd adrift-native && go install github.com/magefile/mage && mage -v bootstrap && mage -v build
+```
 
 1.  Install Wails dependencies ([detailed instructions here](https://wails.io/docs/gettingstarted/installation))
 
@@ -38,7 +50,7 @@ Available scripts (`mage -l` for script list):
 
 ## Documentation
 
--   [wails.io/docs](https://wails.io/docs)
+-   [wails.io/docs](https://wails.io/docs/introduction)
 -   [wails project config](https://wails.io/docs/reference/project-config)
 -   [build readme](build/README.md)
 -   [frontend readme](frontend/README.md)
