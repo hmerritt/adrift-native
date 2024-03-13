@@ -20,23 +20,18 @@ jobs:
             matrix:
                 build:
                     - name: app_test
-                      platformShort: linux
                       platform: linux/amd64
                       os: ubuntu-latest
                     - name: app_test
-                      platformShort: windows
                       platform: windows/amd64
                       os: windows-latest
                     - name: app_test
-                      platformShort: darwin
                       platform: darwin/universal
                       os: macos-latest
         runs-on: ${{ matrix.build.os }}
         steps:
             - uses: actions/checkout@v4
-
-            - name: Setup app
-              uses: ./.github/actions/core-setup.yml
+            - uses: ./.github/actions/core-setup
 
             - name: Test app
-              uses: ./.github/actions/app-test.yml
+              uses: ./.github/actions/app-test

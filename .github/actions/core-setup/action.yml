@@ -10,6 +10,7 @@ runs:
     steps:
         - name: Install Linux packages
           if: runner.os == 'Linux'
+          shell: bash
           run: |
               sudo apt update
               sudo apt install -y libgtk-3-dev libwebkit2gtk-4.0-dev gcc g++
@@ -25,17 +26,20 @@ runs:
               node-version: ${{ env.NODE_VERSION }}
 
         - name: Setup Yarn
+          shell: bash
           run: |
               corepack enable
               corepack prepare yarn@stable --activate
               yarn set version 3.5.0
 
         - name: Setup app frontend
+          shell: bash
           run: |
               cd frontend
               yarn install
 
         - name: Setup app Go
+          shell: bash
           run: |
               go install github.com/magefile/mage
               mage -v bootstrap
