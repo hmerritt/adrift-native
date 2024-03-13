@@ -12,6 +12,7 @@ func Bootstrap() error {
 	return RunSync([][]string{
 		{"go", "mod", "vendor"},
 		{"go", "mod", "tidy"},
+		{"go", "generate", "-tags", "tools", "tools/tools.go"},
 	})
 }
 
