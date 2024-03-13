@@ -73,21 +73,24 @@ jobs:
                     Linux)
                       echo "::set-output name=binary_path::adrift-native"
                       echo "::set-output name=binary_name::adrift-native"
+                      echo "::set-output name=binary_suffix::"
                       ;;
                     Windows)
                       echo "::set-output name=binary_path::adrift-native.exe"
-                      echo "::set-output name=binary_name::adrift-native.exe"
+                      echo "::set-output name=binary_name::adrift-native"
+                      echo "::set-output name=binary_suffix::.exe"
                       ;;
                     macOS)
                       echo "::set-output name=binary_path::Adrift Native.app/Contents/MacOS/Adrift Native"
                       echo "::set-output name=binary_name::adrift-native"
+                      echo "::set-output name=binary_suffix::"
                       ;;
                   esac
 
             - name: Upload binary artifact
               uses: actions/upload-artifact@v4
               with:
-                  name: ${{ steps.binary_variables.outputs.binary_name }}-${{ matrix.build.platformShort }}
+                  name: ${{ steps.binary_variables.outputs.binary_name }}-${{ matrix.build.platformShort }}${{ matrix.build.binary_suffix }}
                   path: ./build/bin/${{ steps.binary_variables.outputs.binary_path }}
                   # ./build/bin/adrift-native
                   # ./build/bin/adrift-native.exe
@@ -103,7 +106,7 @@ jobs:
             - name: Download binary artifacts
               uses: actions/download-artifact@v4
               with:
-                  path: .
+                  path: adrift-native
                   pattern: adrift-native-*
                   merge-multiple: true
             - name: Create Release
@@ -117,9 +120,9 @@ jobs:
                   draft: true
                   prerelease: false
                   files: |
-                      adrift-native-darwin
-                      adrift-native-linux
-                      adrift-native-windows.exe
+                      adrift-native/adrift-native-darwin
+                      adrift-native/adrift-native-linux
+                      adrift-native/adrift-native-windows.exe
 
             - name: Download artifacts
               uses: actions/download-artifact@v2
