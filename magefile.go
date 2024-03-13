@@ -14,7 +14,7 @@ func Bootstrap() error {
 	// Install required linux packages
 	if runtime.GOOS == "linux" {
 		if ExecExists("apt") {
-			err = RunSync([][]string{
+			err := RunSync([][]string{
 				{"sudo", "apt", "update", "-y"},
 				{"sudo", "apt", "install", "-y", "libgtk-3-dev", "libwebkit2gtk-4.0-dev", "gcc", "g++", "upx"},
 			})
@@ -35,13 +35,15 @@ func Bootstrap() error {
 		}
 
 		// Install xcode cli tools
-		if ExecExists("xcode-select") && err := sh.Run("xcode-select", "-p"); err != nil {
-			if err := sh.Run("xcode-select", "--install"); err != nil {
-				return err
+		if ExecExists("xcode-select") {
+			if err := sh.Run("xcode-select", "-p"); err != nil {
+				if err := sh.Run("xcode-select", "--install"); err != nil {
+					return err
+				}
 			}
 		}
 
-		err = RunSync([][]string{
+		err := RunSync([][]string{
 			{"brew", "install", "upx"},
 		})
 
