@@ -13,6 +13,7 @@ runs:
 
         - name: Install MacOS packages
           if: runner.os == 'macOS'
+          shell: bash
           run: |
               /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
               brew install upx
