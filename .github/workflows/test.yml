@@ -10,4 +10,4 @@ on:
 
 jobs:
     test:
-        uses: ./.github/workflows/core-test.yml@main
+        uses: ./.github/workflows/core-test.yml

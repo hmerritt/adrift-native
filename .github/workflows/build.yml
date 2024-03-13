@@ -7,7 +7,7 @@ on:
 
 jobs:
     test:
-        uses: ./.github/workflows/core-test.yml@main
+        uses: ./.github/workflows/core-test.yml
     build:
         needs: test
         strategy:
