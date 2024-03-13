@@ -73,7 +73,7 @@ jobs:
                       echo "::set-output name=binary_name::adrift-native.exe"
                       ;;
                     macOS)
-                      echo "::set-output name=binary_path::Adrift Native"
+                      echo "::set-output name=binary_path::Adrift Native.app/Contents/MacOS/Adrift Native"
                       echo "::set-output name=binary_name::adrift-native"
                       ;;
                   esac
