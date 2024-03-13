@@ -69,32 +69,28 @@ jobs:
               id: binary_variables
               shell: bash
               run: |
+                  binary_name="adrift-native-${{ matrix.build.platformShort }}"
+                  echo "::set-output name=binary_name::${binary_name}"
                   case "${{ runner.os }}" in
                     Linux)
-                      echo "::set-output name=binary_path::adrift-native"
-                      echo "::set-output name=binary_name::adrift-native"
                       echo "::set-output name=binary_suffix::"
+                      mv -f "./build/bin/adrift-native" "./build/bin/${binary_name}"
                       ;;
                     Windows)
-                      echo "::set-output name=binary_path::adrift-native.exe"
-                      echo "::set-output name=binary_name::adrift-native"
                       echo "::set-output name=binary_suffix::.exe"
+                      mv -f "./build/bin/adrift-native.exe" "./build/bin/${binary_name}.exe"
                       ;;
                     macOS)
-                      echo "::set-output name=binary_path::Adrift Native.app/Contents/MacOS/Adrift Native"
-                      echo "::set-output name=binary_name::adrift-native"
                       echo "::set-output name=binary_suffix::"
+                      mv -f "./build/bin/Adrift Native.app/Contents/MacOS/Adrift Native" "./build/bin/${binary_name}"
                       ;;
                   esac
 
             - name: Upload binary artifact
               uses: actions/upload-artifact@v4
               with:
-                  name: ${{ steps.binary_variables.outputs.binary_name }}-${{ matrix.build.platformShort }}${{ matrix.build.binary_suffix }}
-                  path: ./build/bin/${{ steps.binary_variables.outputs.binary_path }}
-                  # ./build/bin/adrift-native
-                  # ./build/bin/adrift-native.exe
-                  # ./build/bin/Adrift Native.app/Contents/MacOS/Adrift Native
+                  name: ${{ steps.binary_variables.outputs.binary_name }}
+                  path: ./build/bin/${{ steps.binary_variables.outputs.binary_name }}${{ steps.binary_variables.outputs.binary_suffix }}
 
     #
     # Create github release and upload binary
@@ -116,13 +112,13 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   tag_name: ${{ github.ref }}
-                  name: Release v${{ github.ref }}
+                  name: Release v${{ github.ref_name }}
                   draft: true
                   prerelease: false
                   files: |
-                      adrift-native/adrift-native-darwin
-                      adrift-native/adrift-native-linux
-                      adrift-native/adrift-native-windows.exe
+                      adrift-native/adrift-native/adrift-native/adrift-native-darwin
+                      adrift-native/adrift-native/adrift-native/adrift-native-linux
+                      adrift-native/adrift-native/adrift-native/adrift-native-windows.exe
 
             - name: Download artifacts
               uses: actions/download-artifact@v2
