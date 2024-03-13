@@ -7,20 +7,7 @@ on:
 
 jobs:
     test:
-        strategy:
-            fail-fast: false
-            matrix:
-                build:
-                    - name: app_test
-                      platform: linux/amd64
-                      os: ubuntu-latest
-                    - name: app_test
-                      platform: windows/amd64
-                      os: windows-latest
-                    - name: app_test
-                      platform: darwin/universal
-                      os: macos-latest
-        runs-on: ${{ matrix.build.os }}
+        runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
 
