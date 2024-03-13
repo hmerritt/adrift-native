@@ -1,9 +1,13 @@
 name: App build
 
-on: [push, pull_request]
+on:
+    push:
+        tags:
+            - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
     build:
+        needs: test
         strategy:
             fail-fast: false
             matrix:
@@ -45,12 +49,10 @@ jobs:
                   corepack prepare yarn@stable --activate
                   yarn set version 3.5.0
 
-            - name: Build frontend
+            - name: Prep frontend for build
               run: |
                   cd frontend
                   yarn install
-                  yarn test:coverage
-                  yarn build
 
             - name: Build app
               run: |
@@ -58,8 +60,60 @@ jobs:
                   mage -v bootstrap
                   mage -v build
 
-            # - name: Upload Go binary
-            #   uses: actions/upload-artifact@v2
-            #   with:
-            #     name: go-app
-            #     path: path/to/go-app/your-go-binary
+            - name: Set binary variables
+              id: binary_variables
+              run: |
+                  case "${{ runner.os }}" in
+                    Linux)
+                      echo "::set-output name=binary_path::adrift-native"
+                      echo "::set-output name=binary_name::adrift-native"
+                      ;;
+                    Windows)
+                      echo "::set-output name=binary_path::adrift-native.exe"
+                      echo "::set-output name=binary_name::adrift-native.exe"
+                      ;;
+                    macOS)
+                      echo "::set-output name=binary_path::Adrift Native"
+                      echo "::set-output name=binary_name::adrift-native"
+                      ;;
+                  esac
+
+            - name: Upload binary artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ steps.binary_variables.outputs.binary_name }}-${{ matrix.build.os }}
+                  path: ./build/bin/${{ steps.binary_variables.outputs.binary_path }}
+                  # ./build/bin/adrift-native
+                  # ./build/bin/adrift-native.exe
+                  # ./build/bin/Adrift Native.app/Contents/MacOS/Adrift Native
+
+    #
+    # Create github release and upload binary
+    #
+    release:
+        needs: build
+        runs-on: ubuntu-latest
+        steps:
+            - name: Download binary artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  path: .
+                  pattern: adrift-native-*
+                  merge-multiple: true
+            - name: Create Release
+              id: create_release
+              uses: softprops/action-gh-release@v2
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name: ${{ github.ref }}
+                  name: Release v${{ github.ref }}
+                  draft: true
+                  prerelease: false
+                  files: |
+                      adrift-native-darwin
+                      adrift-native-linux
+                      adrift-native-windows.exe
+
+            - name: Download artifacts
+              uses: actions/download-artifact@v2
