@@ -5,9 +5,6 @@ package main
 import (
 	// "github.com/magefile/mage/mg"
 
-	"fmt"
-	"os"
-	"os/exec"
 	"runtime"
 
 	"github.com/magefile/mage/sh"
@@ -39,7 +36,7 @@ func Bootstrap() error {
 
 		// Install xcode cli tools
 		if ExecExists("xcode-select") && err := sh.Run("xcode-select", "-p"); err != nil {
-			err := sh.Run("xcode-select", "--install"); err != nil {
+			if err := sh.Run("xcode-select", "--install"); err != nil {
 				return err
 			}
 		}
