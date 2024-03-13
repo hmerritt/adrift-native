@@ -4,31 +4,15 @@ package main
 
 import (
 	// "github.com/magefile/mage/mg"
+
 	"github.com/magefile/mage/sh"
 )
 
 func Bootstrap() error {
-	deps := []string{
-		"mvdan.cc/garble@latest",
-		"gotest.tools/gotestsum",
-		"github.com/magefile/mage",
-		"github.com/wailsapp/wails/v2/cmd/wails",
-	}
-
-	for _, dep := range deps {
-		err := RunSync([][]string{
-			{"go", "get", dep},
-			{"go", "install", dep},
-		})
-
-		if err != nil {
-			return err
-		}
-	}
-
 	return RunSync([][]string{
+		{"go", "mod", "vendor"},
+		{"go", "mod", "tidy"},
 		{"go", "generate", "-tags", "tools", "tools/tools.go"},
-		{"go", "mod", "download"},
 	})
 }
 
@@ -48,22 +32,37 @@ func Start() error {
 }
 
 func Test() error {
+	// Runs Go tests
+	return RunSync([][]string{
+		{"gotestsum", "--format", "pkgname", "--", "--cover", "./..."},
+	})
+}
+func TestAll() error {
 	// Runs both Go, and frontend tests
 	return RunSync([][]string{
 		{"gotestsum", "--format", "pkgname", "--", "--cover", "./..."},
-		{"yarn", "--cwd", "frontend", "test"},
+		{"yarn", "--cwd", "frontend", "test:coverage"},
 	})
 }
 
+func BuildDev() error {
+	return sh.Run(
+		"wails",
+		"build",
+		"-trimpath",
+		"-race",
+		"-debug",
+	)
+}
 func Build() error {
 	return sh.Run(
 		"wails",
 		"build",
-		"-platform",
-		"windows/amd64,darwin/universal,linux/amd64",
 		"-ldflags",
 		"-s -w",
+		"-trimpath",
 		// "-nsis", // Builds a Windows installer
 		"-upx", // Binary compression
+		"-upxflags", "--best",
 	)
 }

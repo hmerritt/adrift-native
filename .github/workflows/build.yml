@@ -1,36 +1,104 @@
-name: Wails build
+name: App build
 
-on: [push, pull_request]
+on:
+    push:
+        tags:
+            - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: App core Setup
+              uses: ./.github/actions/core-setup
+
+            - name: Test app
+              uses: ./.github/actions/app-test
     build:
+        needs: test
         strategy:
             fail-fast: false
             matrix:
                 build:
-                    [
-                        {
-                            name: wailsTest,
-                            platform: linux/amd64,
-                            os: ubuntu-latest,
-                        },
-                        {
-                            name: wailsTest,
-                            platform: windows/amd64,
-                            os: windows-latest,
-                        },
-                        {
-                            name: wailsTest,
-                            platform: darwin/universal,
-                            os: macos-latest,
-                        },
-                    ]
+                    - name: app_build
+                      platformShort: linux
+                      platform: linux/amd64
+                      os: ubuntu-latest
+                    - name: app_build
+                      platformShort: windows
+                      platform: windows/amd64
+                      os: windows-latest
+                    - name: app_build
+                      platformShort: darwin
+                      platform: darwin/universal
+                      os: macos-latest
         runs-on: ${{ matrix.build.os }}
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
+
+            - name: App core Setup
+              uses: ./.github/actions/core-setup
+
+            - name: Build app
+              run: |
+                  mage -v build
+
+            - name: Set binary variables
+              id: binary_variables
+              shell: bash
+              run: |
+                  binary_name="adrift-native-${{ matrix.build.platformShort }}"
+                  echo "::set-output name=binary_name::${binary_name}"
+                  case "${{ runner.os }}" in
+                    Linux)
+                      echo "::set-output name=binary_suffix::"
+                      mv -f "./build/bin/adrift-native" "./build/bin/${binary_name}"
+                      ;;
+                    Windows)
+                      echo "::set-output name=binary_suffix::.exe"
+                      mv -f "./build/bin/adrift-native.exe" "./build/bin/${binary_name}.exe"
+                      ;;
+                    macOS)
+                      echo "::set-output name=binary_suffix::"
+                      mv -f "./build/bin/Adrift Native.app/Contents/MacOS/Adrift Native" "./build/bin/${binary_name}"
+                      ;;
+                  esac
+
+            - name: Upload binary artifact
+              uses: actions/upload-artifact@v4
               with:
-                  submodules: recursive
-            - uses: dAppServer/wails-build-action@v2.2
+                  name: ${{ steps.binary_variables.outputs.binary_name }}
+                  path: ./build/bin/${{ steps.binary_variables.outputs.binary_name }}${{ steps.binary_variables.outputs.binary_suffix }}
+
+    #
+    # Create github release and upload binary
+    #
+    release:
+        needs: build
+        runs-on: ubuntu-latest
+        steps:
+            - name: Download binary artifacts
+              uses: actions/download-artifact@v4
               with:
-                  build-name: ${{ matrix.build.name }}
-                  build-platform: ${{ matrix.build.platform }}
+                  path: adrift-native
+                  pattern: adrift-native-*
+                  merge-multiple: true
+            - name: Create Release
+              id: create_release
+              uses: softprops/action-gh-release@v2
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name: ${{ github.ref }}
+                  name: Release v${{ github.ref_name }}
+                  draft: true
+                  prerelease: false
+                  files: |
+                      ./adrift-native/adrift-native-darwin
+                      ./adrift-native/adrift-native-linux
+                      ./adrift-native/adrift-native-windows.exe
+
+            - name: Download artifacts
+              uses: actions/download-artifact@v2

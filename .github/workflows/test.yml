@@ -1,0 +1,26 @@
+name: App test
+
+on:
+    push:
+        tags-ignore:
+            - '[0-9]+.[0-9]+.[0-9]+'
+        branches:
+            - '**'
+    pull_request:
+        branches:
+            - '*'
+
+# env:
+#     MATRIX_OS: ubuntu-latest windows-latest macos-latest
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: App core Setup
+              uses: ./.github/actions/core-setup
+
+            - name: Test app
+              uses: ./.github/actions/app-test
