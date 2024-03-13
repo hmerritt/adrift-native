@@ -31,7 +31,9 @@ jobs:
         runs-on: ${{ matrix.build.os }}
         steps:
             - uses: actions/checkout@v4
-            - uses: ./.github/actions/core-setup
+
+            - name: Setup
+              uses: ./.github/actions/core-setup
 
             - name: Test app
               uses: ./.github/actions/app-test
