@@ -17,12 +17,15 @@ jobs:
                 node-version: [20.x]
                 build:
                     - name: appBuild
+                      platformShort: linux
                       platform: linux/amd64
                       os: ubuntu-latest
                     - name: appBuild
+                      platformShort: windows
                       platform: windows/amd64
                       os: windows-latest
                     - name: appBuild
+                      platformShort: darwin
                       platform: darwin/universal
                       os: macos-latest
         runs-on: ${{ matrix.build.os }}
@@ -84,7 +87,7 @@ jobs:
             - name: Upload binary artifact
               uses: actions/upload-artifact@v4
               with:
-                  name: ${{ steps.binary_variables.outputs.binary_name }}-${{ matrix.build.os }}
+                  name: ${{ steps.binary_variables.outputs.binary_name }}-${{ matrix.build.platformShort }}
                   path: ./build/bin/${{ steps.binary_variables.outputs.binary_path }}
                   # ./build/bin/adrift-native
                   # ./build/bin/adrift-native.exe
