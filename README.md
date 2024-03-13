@@ -21,7 +21,7 @@ Initial binary size (for Windows) is less-than 10MB, and as low as **3MB** when 
 **_Quick start_**, get up an running in one command:
 
 ```bash
-git clone https://github.com/hmerritt/adrift-native && cd adrift-native && go install github.com/magefile/mage && mage -v bootstrap && mage -v build
+git clone https://github.com/hmerritt/adrift-native && cd adrift-native && go install github.com/magefile/mage && go run mage.go -v bootstrap && go run mage.go -v build
 ```
 
 1.  Install Wails dependencies ([detailed instructions here](https://wails.io/docs/gettingstarted/installation))
