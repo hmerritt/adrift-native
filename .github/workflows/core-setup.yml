@@ -1,0 +1,46 @@
+name: Core setup
+
+on:
+    workflow_call:
+        inputs:
+            os:
+                required: true
+                type: string
+
+jobs:
+    core_setup:
+        runs-on: ${{ inputs.os }}
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install Linux packages
+              if: runner.os == 'Linux'
+              run: |
+                  sudo apt update
+                  sudo apt install -y libgtk-3-dev libwebkit2gtk-4.0-dev gcc g++
+
+            - name: Setup Go ${{ matrix.go-version }}
+              uses: actions/setup-go@v5
+              with:
+                  go-version: ${{ matrix.go-version }}
+
+            - name: Setup Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node-version }}
+
+            - name: Setup Yarn
+              run: |
+                  corepack enable
+                  corepack prepare yarn@stable --activate
+                  yarn set version 3.5.0
+
+            - name: Setup app frontend
+              run: |
+                  cd frontend
+                  yarn install
+
+            - name: Setup app Go
+              run: |
+                  go install github.com/magefile/mage
+                  mage -v bootstrap
