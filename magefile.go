@@ -5,10 +5,55 @@ package main
 import (
 	// "github.com/magefile/mage/mg"
 
+	"fmt"
+	"os"
+	"os/exec"
+	"runtime"
+
 	"github.com/magefile/mage/sh"
 )
 
 func Bootstrap() error {
+	// Install required linux packages
+	if runtime.GOOS == "linux" {
+		if ExecExists("apt") {
+			err = RunSync([][]string{
+				{"sudo", "apt", "update", "-y"},
+				{"sudo", "apt", "install", "-y", "libgtk-3-dev", "libwebkit2gtk-4.0-dev", "gcc", "g++", "upx"},
+			})
+
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	// Install required macOS packages
+	if runtime.GOOS == "darwin" {
+		// Install Homebrew
+		if !ExecExists("brew") {
+			if err := sh.Run("/bin/bash", "-c", `"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`); err != nil {
+				return err
+			}
+		}
+
+		// Install xcode cli tools
+		if ExecExists("xcode-select") && err := sh.Run("xcode-select", "-p"); err != nil {
+			err := sh.Run("xcode-select", "--install"); err != nil {
+				return err
+			}
+		}
+
+		err = RunSync([][]string{
+			{"brew", "install", "upx"},
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+
+	// Install Go dependencies
 	return RunSync([][]string{
 		{"go", "mod", "vendor"},
 		{"go", "mod", "tidy"},

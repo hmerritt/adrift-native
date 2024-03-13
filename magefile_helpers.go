@@ -4,6 +4,7 @@
 package main
 
 import (
+	"os/exec"
 	"sync"
 
 	"github.com/magefile/mage/sh"
@@ -62,4 +63,10 @@ func RunParallel(commands [][]string) error {
 	}
 
 	return nil
+}
+
+// Checks if an executable exists in PATH
+func ExecExists(e string) bool {
+	_, err := exec.LookPath(e)
+	return err == nil
 }
