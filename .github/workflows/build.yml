@@ -81,6 +81,17 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
+            - name: Setup Go 1.22.0
+              uses: actions/setup-go@v5
+              with:
+                  go-version: '1.22.0'
+
+            - name: Setup app Go
+              shell: bash
+              run: |
+                  go install github.com/magefile/mage
+                  mage -v bootstrap
+
             - name: Download binary artifacts
               uses: actions/download-artifact@v4
               with:
