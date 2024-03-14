@@ -73,7 +73,7 @@ jobs:
                   path: ./build/bin/${{ steps.binary_variables.outputs.binary_name }}${{ steps.binary_variables.outputs.binary_suffix }}
 
     #
-    # Create github release and upload binary
+    # Release binaries to various platforms. E.g. FTP server, GitHub releases.
     #
     release:
         needs: build
@@ -86,13 +86,23 @@ jobs:
                   pattern: adrift-native-*
                   merge-multiple: true
 
-            - name: Create Release
+            - name: Release to FTP
+              uses: ./.github/actions/core-release-ftp
+              with:
+                  ftp_host: ${{ secrets.FTP_HOST }}
+                  ftp_username: ${{ secrets.FTP_USERNAME }}
+                  ftp_password: ${{ secrets.FTP_PASSWORD }}
+                  ftp_path: ${{ secrets.FTP_PATH }}
+                  local_path: ./adrift-native
+                  release_version: ${{ github.ref_name }}
+
+            - name: Release to GitHub via tagged-release
               id: create_release
               uses: softprops/action-gh-release@v2
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  tag_name: ${{ github.ref }}
+                  tag_name: ${{ github.ref_name }}
                   name: Release v${{ github.ref_name }}
                   draft: true
                   prerelease: false

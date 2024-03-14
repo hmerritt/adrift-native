@@ -15,5 +15,5 @@ runs:
         - name: Test app
           shell: bash
           run: |
-              mage -v test
+              mage -v test:go
               mage -v build

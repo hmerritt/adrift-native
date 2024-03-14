@@ -15,3 +15,6 @@ build/windows
 # frontend
 node_modules
 frontend/dist
+
+# misc
+.env

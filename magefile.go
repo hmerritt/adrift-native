@@ -103,12 +103,12 @@ func (Build) Release() error {
 
 // Upload release binaries to FTP server
 func (Release) FTP() error {
-	releaseVersion := os.Getenv("RELEASE_VERSION")
 	ftpHost := os.Getenv("FTP_HOST")
 	ftpUsername := os.Getenv("FTP_USERNAME")
 	ftpPassword := os.Getenv("FTP_PASSWORD")
 	ftpPath := os.Getenv("FTP_PATH")
 	localPath := os.Getenv("LOCAL_PATH")
+	releaseVersion := os.Getenv("RELEASE_VERSION")
 	ftpReleasePath := path.Join(ftpPath, releaseVersion)
 
 	fmt.Println("(Release) => FTP upload path: " + ftpReleasePath)
@@ -201,7 +201,7 @@ func Bootstrap() error {
 			fmt.Println("(Bootstrap) => Installing required linux packages")
 			err := RunSync([][]string{
 				{"sudo", "apt", "update", "-y"},
-				{"sudo", "apt", "install", "-y", "libgtk-3-dev", "libwebkit2gtk-4.0-dev", "gcc", "g++", "upx"},
+				{"sudo", "apt", "install", "-y", "libgtk-3-dev", "libwebkit2gtk-4.0-dev", "gcc", "g++", "upx", "ftp"},
 			})
 
 			if err != nil {
