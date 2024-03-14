@@ -43,7 +43,7 @@ jobs:
 
             - name: Build app
               run: |
-                  mage -v build
+                  mage -v build:release
 
             - name: Set binary variables
               id: binary_variables

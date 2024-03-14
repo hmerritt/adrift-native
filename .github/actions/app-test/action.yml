@@ -16,4 +16,4 @@ runs:
           shell: bash
           run: |
               mage -v test:go
-              mage -v build
+              mage -v build:release
