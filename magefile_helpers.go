@@ -4,6 +4,7 @@
 package main
 
 import (
+	"os"
 	"os/exec"
 	"sync"
 
@@ -14,9 +15,9 @@ const (
 	MODULE_NAME = "github.com/hmerritt/adrift-native" // go.mod module name
 )
 
-//
+// ----------------------------------------------------------------------------
 // Runtime helpers
-//
+// ----------------------------------------------------------------------------
 
 // Runs multiple cmd commands one-by-one
 func RunSync(commands [][]string) error {
@@ -69,4 +70,12 @@ func RunParallel(commands [][]string) error {
 func ExecExists(e string) bool {
 	_, err := exec.LookPath(e)
 	return err == nil
+}
+
+// Get ENV, or use fallback value
+func GetEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }

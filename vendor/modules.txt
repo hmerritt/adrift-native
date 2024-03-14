@@ -275,6 +275,9 @@ github.com/jchv/go-winloader/internal/winloader
 # github.com/kevinburke/ssh_config v1.2.0
 ## explicit
 github.com/kevinburke/ssh_config
+# github.com/kr/fs v0.1.0
+## explicit
+github.com/kr/fs
 # github.com/labstack/echo/v4 v4.11.4
 ## explicit; go 1.18
 github.com/labstack/echo/v4
@@ -361,6 +364,10 @@ github.com/pkg/browser
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
+# github.com/pkg/sftp v1.13.6
+## explicit; go 1.15
+github.com/pkg/sftp
+github.com/pkg/sftp/internal/encoding/ssh/filexfer
 # github.com/pterm/pterm v0.12.79
 ## explicit; go 1.21
 github.com/pterm/pterm
