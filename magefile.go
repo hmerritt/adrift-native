@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"strings"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
@@ -75,6 +76,7 @@ func (Test) Frontend() error {
 func (Build) Debug() error {
 	log := NewLogger()
 	defer log.End()
+	log.Info("Compiling debug binary")
 	return sh.Run(
 		"wails",
 		"build",
@@ -88,6 +90,7 @@ func (Build) Debug() error {
 func (Build) Release() error {
 	log := NewLogger()
 	defer log.End()
+	log.Info("Compiling release binary")
 	return sh.Run(
 		"wails",
 		"build",
@@ -104,12 +107,49 @@ func (Build) Release() error {
 // Release
 // ----------------------------------------------------------------------------
 
-// @TODO: Prep for release (zip, rename, etc...)
-// func (Release) Prepare() error {
-// 	return RunSync([][]string{
-// 		{"mage", "-v", "ftp"},
-// 	})
-// }
+// Prep for release (rename & zip)
+func (Release) Prepare() error {
+	log := NewLogger()
+	defer log.End()
+
+	binaryFileName := os.Getenv("BINARY_FILENAME")
+	releaseVersion := os.Getenv("RELEASE_VERSION")
+	binPath := "build/bin"
+	binaryFilePath := fmt.Sprintf("%s/%s", binPath, binaryFileName)
+
+	log.Info("Finding release binary")
+
+	if binaryFileName == "" || releaseVersion == "" {
+		return log.Error("required environment variables not set")
+	}
+
+	if _, err := os.Stat(binaryFilePath); os.IsNotExist(err) {
+		return log.Error("Failed to find release binary file:", binaryFilePath)
+	}
+
+	log.Info("Renaming binary for release")
+
+	newFileName := fmt.Sprintf("adrift-native_%s_%s_%s", releaseVersion, runtime.GOOS, runtime.GOARCH)
+	if runtime.GOOS == "windows" {
+		newFileName += ".exe"
+	}
+	newFilePath := fmt.Sprintf("%s/%s", binPath, newFileName)
+	zipFilePath := fmt.Sprintf("%s.zip", strings.TrimSuffix(newFilePath, ".exe"))
+
+	err := os.Rename(binaryFilePath, newFilePath)
+	if err != nil {
+		return log.Error("Failed to rename binary `%s` to `%s`: %v", binaryFileName, newFileName, err)
+	}
+
+	log.Info("Zip binary for release")
+
+	err = ZipFiles(zipFilePath, newFilePath)
+	if err != nil {
+		return log.Error("Failed to zip binary", err)
+	}
+
+	return nil
+}
 
 // Upload release binaries to FTP server
 func (Release) FTP() error {
@@ -126,11 +166,11 @@ func (Release) FTP() error {
 
 	log.Info("FTP upload path: ", ftpReleasePath)
 
-	if ftpHost == "" || ftpUsername == "" || ftpPassword == "" || ftpPath == "" || localPath == "" {
+	if ftpHost == "" || ftpUsername == "" || ftpPassword == "" || ftpPath == "" || localPath == "" || releaseVersion == "" {
 		return log.Error("required FTP environment variables not set")
 	}
 
-	// (FTP) Connect
+	log.Info("Connecting to FTP server")
 
 	config := &ssh.ClientConfig{
 		User: ftpUsername,
@@ -152,7 +192,7 @@ func (Release) FTP() error {
 	}
 	defer client.Close()
 
-	// (FTP) Create release directory
+	log.Info("Create remote release directory")
 
 	err = client.Mkdir(ftpReleasePath)
 	if err != nil && !os.IsExist(err) {
@@ -160,7 +200,7 @@ func (Release) FTP() error {
 		return log.Error("failed to create directory on SFTP server: %v", err)
 	}
 
-	// (Local) Open local path
+	log.Info("Reading local release files")
 
 	localDir, err := os.Open(localPath)
 	if err != nil {
@@ -173,7 +213,7 @@ func (Release) FTP() error {
 		return log.Error("failed to read local directory: %v", err)
 	}
 
-	// (Local -> FTP) Upload files
+	log.Info("Uploading release files to FTP server")
 
 	for _, file := range files {
 		if !file.IsDir() {

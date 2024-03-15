@@ -4,8 +4,10 @@
 package main
 
 import (
+	"archive/zip"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"runtime"
@@ -19,6 +21,7 @@ import (
 
 const (
 	MODULE_NAME = "github.com/hmerritt/adrift-native" // go.mod module name
+	LOG_LEVEL   = 4                                   // 5 = debug, 4 = info, 3 = warn, 2 = error
 )
 
 // ----------------------------------------------------------------------------
@@ -99,7 +102,7 @@ func NewLogger() *Logger {
 	funcName = funcName[strings.LastIndex(funcName, ".")+1:] // Removes package name
 
 	return &Logger{
-		Level:         4, // Info
+		Level:         LOG_LEVEL,
 		FnInitName:    funcName,
 		InitTimestamp: time.Now(),
 		PrevTimestamp: time.Now(),
@@ -180,4 +183,49 @@ func GetEnv(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+// Zip one or more files
+func ZipFiles(zipPath string, files ...string) error {
+	zipFile, err := os.Create(zipPath)
+	if err != nil {
+		return err
+	}
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	// Add the files to the ZIP archive
+	for _, file := range files {
+		fileToZip, err := os.Open(file)
+		if err != nil {
+			return err
+		}
+		defer fileToZip.Close()
+
+		info, err := fileToZip.Stat()
+		if err != nil {
+			return err
+		}
+
+		header, err := zip.FileInfoHeader(info)
+		if err != nil {
+			return err
+		}
+
+		header.Method = zip.Deflate
+
+		writer, err := zipWriter.CreateHeader(header)
+		if err != nil {
+			return err
+		}
+
+		_, err = io.Copy(writer, fileToZip)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
