@@ -127,7 +127,7 @@ func (Release) FTP() error {
 	log.Info("FTP upload path: ", ftpReleasePath)
 
 	if ftpHost == "" || ftpUsername == "" || ftpPassword == "" || ftpPath == "" || localPath == "" {
-		return fmt.Errorf("(Release) => required FTP environment variables not set")
+		return log.Error("required FTP environment variables not set")
 	}
 
 	// (FTP) Connect
@@ -142,13 +142,13 @@ func (Release) FTP() error {
 
 	conn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%s", ftpHost, "22"), config)
 	if err != nil {
-		return fmt.Errorf("(Release) => failed to connect to SFTP server: %v", err)
+		return log.Error("failed to connect to SFTP server: %v", err)
 	}
 	defer conn.Close()
 
 	client, err := sftp.NewClient(conn)
 	if err != nil {
-		return fmt.Errorf("(Release) => failed to create SFTP client: %v", err)
+		return log.Error("failed to create SFTP client: %v", err)
 	}
 	defer client.Close()
 
@@ -157,20 +157,20 @@ func (Release) FTP() error {
 	err = client.Mkdir(ftpReleasePath)
 	if err != nil && !os.IsExist(err) {
 		// If the directory already exists, ignore the error
-		return fmt.Errorf("(Release) => failed to create directory on SFTP server: %v", err)
+		return log.Error("failed to create directory on SFTP server: %v", err)
 	}
 
 	// (Local) Open local path
 
 	localDir, err := os.Open(localPath)
 	if err != nil {
-		return fmt.Errorf("(Release) => failed to open local directory: %v", err)
+		return log.Error("failed to open local directory: %v", err)
 	}
 	defer localDir.Close()
 
 	files, err := localDir.Readdir(-1)
 	if err != nil {
-		return fmt.Errorf("(Release) => failed to read local directory: %v", err)
+		return log.Error("failed to read local directory: %v", err)
 	}
 
 	// (Local -> FTP) Upload files
@@ -182,19 +182,19 @@ func (Release) FTP() error {
 
 			localFile, err := os.Open(localFilePath)
 			if err != nil {
-				return fmt.Errorf("failed to open local file: %v", err)
+				return log.Error("failed to open local file: %v", err)
 			}
 			defer localFile.Close()
 
 			remoteFile, err := client.Create(remoteFilePath)
 			if err != nil {
-				return fmt.Errorf("failed to create remote file: %v", err)
+				return log.Error("failed to create remote file: %v", err)
 			}
 			defer remoteFile.Close()
 
 			_, err = remoteFile.ReadFrom(localFile)
 			if err != nil {
-				return fmt.Errorf("failed to upload file to SFTP server: %v", err)
+				return log.Error("failed to upload file to SFTP server: %v", err)
 			}
 		}
 	}
@@ -221,7 +221,7 @@ func Bootstrap() error {
 			})
 
 			if err != nil {
-				return err
+				return log.Error(err)
 			}
 		}
 	}
@@ -232,7 +232,7 @@ func Bootstrap() error {
 		if !ExecExists("brew") {
 			log.Info("Installing Homebrew")
 			if err := sh.Run("/bin/bash", "-c", `"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`); err != nil {
-				return err
+				return log.Error(err)
 			}
 		}
 
@@ -241,7 +241,7 @@ func Bootstrap() error {
 			if err := sh.Run("xcode-select", "-p"); err != nil {
 				log.Info("Installing xcode cli tools")
 				if err := sh.Run("xcode-select", "--install"); err != nil {
-					return err
+					return log.Error(err)
 				}
 			}
 		}
@@ -252,7 +252,7 @@ func Bootstrap() error {
 		})
 
 		if err != nil {
-			return err
+			return log.Error(err)
 		}
 	}
 
@@ -262,23 +262,19 @@ func Bootstrap() error {
 		tmpDir := "__tmp_mage"
 
 		if err := sh.Run("git", "clone", "https://github.com/magefile/mage", tmpDir); err != nil {
-			log.Error("error: installing mage: ", err)
-			return err
+			return log.Error("error: installing mage: ", err)
 		}
 
 		if err := os.Chdir(tmpDir); err != nil {
-			log.Error("error: installing mage: ", err)
-			return err
+			return log.Error("error: installing mage: ", err)
 		}
 
 		if err := sh.Run("go", "run", "bootstrap.go"); err != nil {
-			log.Error("error: installing mage: ", err)
-			return err
+			return log.Error("error: installing mage: ", err)
 		}
 
 		if err := os.Chdir("../"); err != nil {
-			log.Error("error: installing mage: ", err)
-			return err
+			return log.Error("error: installing mage: ", err)
 		}
 
 		os.RemoveAll(tmpDir)

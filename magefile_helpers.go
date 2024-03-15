@@ -4,6 +4,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -81,14 +82,14 @@ type Logger struct {
 	Level uint32
 
 	// Name of the function Logger was initiated from.
-	FnName string
+	FnInitName string
 
 	// Timestamp of Logger initiation.
 	InitTimestamp time.Time
 
 	// Timestamp of the most recent log. Used to calculate and show the time in
 	// milliseconds since last log.
-	LogTimestamp time.Time
+	PrevTimestamp time.Time
 }
 
 func NewLogger() *Logger {
@@ -99,9 +100,9 @@ func NewLogger() *Logger {
 
 	return &Logger{
 		Level:         4, // Info
-		FnName:        funcName,
+		FnInitName:    funcName,
 		InitTimestamp: time.Now(),
-		LogTimestamp:  time.Now(),
+		PrevTimestamp: time.Now(),
 	}
 }
 
@@ -109,21 +110,26 @@ func (l *Logger) log(level uint32, a ...interface{}) {
 	if l.Level < level {
 		return
 	}
-	toLog := fmt.Sprintf("(%s) +%7s => ", l.FnName, DurationSince(l.LogTimestamp))
+
+	currentTime := time.Now()
+	formattedTime := currentTime.Format("2006-01-02 15:04:05")
+	toLog := fmt.Sprintf("%s (%s) +%7s => ", formattedTime, l.FnInitName, DurationSince(l.PrevTimestamp))
+
 	messages := make([]interface{}, 0)
 	messages = append(messages, toLog)
 	messages = append(messages, a...)
 	fmt.Println(messages...)
-	l.LogTimestamp = time.Now()
+	l.PrevTimestamp = currentTime
 }
 
 func (l *Logger) SetLevel(level uint32) {
 	l.Level = level
 }
-func (l *Logger) Error(messages ...interface{}) {
+func (l *Logger) Error(messages ...interface{}) error {
 	color.Set(color.FgRed)
 	defer color.Unset()
 	l.log(2, messages...)
+	return errors.New(strings.Trim(strings.Join(strings.Fields(fmt.Sprint(messages)), " "), "[]"))
 }
 func (l *Logger) Warn(messages ...interface{}) {
 	color.Set(color.FgYellow)
@@ -139,8 +145,7 @@ func (l *Logger) Debug(messages ...interface{}) {
 func (l *Logger) End() {
 	color.Set(color.FgCyan)
 	defer color.Unset()
-	fmt.Printf("(%s) %8s => %s\n", l.FnName, "in", DurationSince(l.InitTimestamp))
-	l.LogTimestamp = time.Now()
+	l.log(4, fmt.Sprintf("took %s", DurationSince(l.InitTimestamp)))
 }
 
 func DurationSince(since time.Time) string {
