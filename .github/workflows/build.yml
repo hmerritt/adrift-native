@@ -52,11 +52,9 @@ jobs:
                   case "${{ runner.os }}" in
                     Linux)
                       export BINARY_SUFFIX=
-                      mv -f "./build/bin/adrift-native" "./build/bin/adrift-native"
                       ;;
                     Windows)
                       export BINARY_SUFFIX=.exe
-                      mv -f "./build/bin/adrift-native.exe" "./build/bin/adrift-native.exe"
                       ;;
                     macOS)
                       export BINARY_SUFFIX=
