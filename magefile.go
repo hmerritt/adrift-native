@@ -7,7 +7,6 @@ import (
 	"os"
 	"path"
 	"runtime"
-	"strings"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
@@ -171,13 +170,13 @@ func (Release) FTP() error {
 
 	conn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%s", ftpHost, "22"), config)
 	if err != nil {
-		return log.Error("failed to connect to SFTP server: %v", err)
+		return log.Error("failed to connect to SFTP server:", err)
 	}
 	defer conn.Close()
 
 	client, err := sftp.NewClient(conn)
 	if err != nil {
-		return log.Error("failed to create SFTP client: %v", err)
+		return log.Error("failed to create SFTP client:", err)
 	}
 	defer client.Close()
 
@@ -186,20 +185,20 @@ func (Release) FTP() error {
 	err = client.Mkdir(ftpReleasePath)
 	if err != nil && !os.IsExist(err) {
 		// If the directory already exists, ignore the error
-		return log.Error("failed to create directory on SFTP server: %v", err)
+		return log.Error("failed to create directory on SFTP server:", err)
 	}
 
 	log.Info("reading local release files")
 
 	localDir, err := os.Open(localPath)
 	if err != nil {
-		return log.Error("failed to open local directory: %v", err)
+		return log.Error("failed to open local directory:", err)
 	}
 	defer localDir.Close()
 
 	files, err := localDir.Readdir(-1)
 	if err != nil {
-		return log.Error("failed to read local directory: %v", err)
+		return log.Error("failed to read local directory:", err)
 	}
 
 	log.Info("uploading release files to ftp server")
@@ -211,19 +210,19 @@ func (Release) FTP() error {
 
 			localFile, err := os.Open(localFilePath)
 			if err != nil {
-				return log.Error("failed to open local file: %v", err)
+				return log.Error("failed to open local file:", err)
 			}
 			defer localFile.Close()
 
 			remoteFile, err := client.Create(remoteFilePath)
 			if err != nil {
-				return log.Error("failed to create remote file: %v", err)
+				return log.Error("failed to create remote file:", err)
 			}
 			defer remoteFile.Close()
 
 			_, err = remoteFile.ReadFrom(localFile)
 			if err != nil {
-				return log.Error("failed to upload file to SFTP server: %v", err)
+				return log.Error("failed to upload file to SFTP server:", err)
 			}
 		}
 	}

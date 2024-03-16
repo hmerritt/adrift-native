@@ -97,7 +97,7 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   path: adrift-native
-                  pattern: adrift-native-*
+                  pattern: adrift-native*
                   merge-multiple: true
 
             - name: Release to FTP
@@ -121,6 +121,6 @@ jobs:
                   draft: true
                   prerelease: false
                   files: |
-                      ./adrift-native/adrift-native_${{ github.ref_name }}_darwin_amd64
-                      ./adrift-native/adrift-native_${{ github.ref_name }}_linux_amd64
-                      ./adrift-native/adrift-native_${{ github.ref_name }}_windows_amd64.exe
+                      ./adrift-native/adrift-native_${{ github.ref_name }}_darwin_amd64.zip
+                      ./adrift-native/adrift-native_${{ github.ref_name }}_linux_amd64.zip
+                      ./adrift-native/adrift-native_${{ github.ref_name }}_windows_amd64.zip
