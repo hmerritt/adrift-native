@@ -64,7 +64,7 @@ jobs:
                   export BINARY_FILENAME=adrift-native${BINARY_SUFFIX}
                   export RELEASE_VERSION=${{ github.ref_name }}
                   mage -v release:prepare
-                  export RELEASE_FILENAME=adrift-native_${{ github.ref_name }}_${{ matrix.build.platform }}_${{ matrix.build.arch }}${BINARY_SUFFIX}
+                  export RELEASE_FILENAME=adrift-native_${{ github.ref_name }}_${{ matrix.build.platform }}_${{ matrix.build.arch }}.zip
                   echo "::set-output name=RELEASE_FILENAME::${RELEASE_FILENAME}"
 
             - name: Upload binary artifact
