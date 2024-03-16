@@ -76,7 +76,7 @@ func (Test) Frontend() error {
 func (Build) Debug() error {
 	log := NewLogger()
 	defer log.End()
-	log.Info("Compiling debug binary")
+	log.Info("compiling debug binary")
 	return sh.Run(
 		"wails",
 		"build",
@@ -90,7 +90,7 @@ func (Build) Debug() error {
 func (Build) Release() error {
 	log := NewLogger()
 	defer log.End()
-	log.Info("Compiling release binary")
+	log.Info("compiling release binary")
 	return sh.Run(
 		"wails",
 		"build",
@@ -117,7 +117,7 @@ func (Release) Prepare() error {
 	binPath := "build/bin"
 	binaryFilePath := fmt.Sprintf("%s/%s", binPath, binaryFileName)
 
-	log.Info("Finding release binary")
+	log.Info("finding release binary")
 
 	if binaryFileName == "" || releaseVersion == "" {
 		return log.Error("required environment variables not set")
@@ -127,7 +127,7 @@ func (Release) Prepare() error {
 		return log.Error("Failed to find release binary file:", binaryFilePath)
 	}
 
-	log.Info("Renaming binary for release")
+	log.Info("renaming binary for release")
 
 	newFileName := fmt.Sprintf("adrift-native_%s_%s_%s", releaseVersion, runtime.GOOS, runtime.GOARCH)
 	if runtime.GOOS == "windows" {
@@ -141,7 +141,7 @@ func (Release) Prepare() error {
 		return log.Error("Failed to rename binary `%s` to `%s`: %v", binaryFileName, newFileName, err)
 	}
 
-	log.Info("Zip binary for release")
+	log.Info("zip binary for release")
 
 	err = ZipFiles(zipFilePath, newFilePath)
 	if err != nil {
@@ -164,13 +164,13 @@ func (Release) FTP() error {
 	releaseVersion := os.Getenv("RELEASE_VERSION")
 	ftpReleasePath := path.Join(ftpPath, releaseVersion)
 
-	log.Info("FTP upload path: ", ftpReleasePath)
+	log.Info("ftp upload path: ", ftpReleasePath)
 
 	if ftpHost == "" || ftpUsername == "" || ftpPassword == "" || ftpPath == "" || localPath == "" || releaseVersion == "" {
 		return log.Error("required FTP environment variables not set")
 	}
 
-	log.Info("Connecting to FTP server")
+	log.Info("connecting to ftp server")
 
 	config := &ssh.ClientConfig{
 		User: ftpUsername,
@@ -192,7 +192,7 @@ func (Release) FTP() error {
 	}
 	defer client.Close()
 
-	log.Info("Create remote release directory")
+	log.Info("create remote release directory")
 
 	err = client.Mkdir(ftpReleasePath)
 	if err != nil && !os.IsExist(err) {
@@ -200,7 +200,7 @@ func (Release) FTP() error {
 		return log.Error("failed to create directory on SFTP server: %v", err)
 	}
 
-	log.Info("Reading local release files")
+	log.Info("reading local release files")
 
 	localDir, err := os.Open(localPath)
 	if err != nil {
@@ -213,7 +213,7 @@ func (Release) FTP() error {
 		return log.Error("failed to read local directory: %v", err)
 	}
 
-	log.Info("Uploading release files to FTP server")
+	log.Info("uploading release files to ftp server")
 
 	for _, file := range files {
 		if !file.IsDir() {
@@ -254,7 +254,7 @@ func Bootstrap() error {
 	// Install required linux packages
 	if runtime.GOOS == "linux" {
 		if ExecExists("apt") {
-			log.Info("Installing required linux packages")
+			log.Info("installing required linux packages")
 			err := RunSync([][]string{
 				{"sudo", "apt", "update", "-y"},
 				{"sudo", "apt", "install", "-y", "libgtk-3-dev", "libwebkit2gtk-4.0-dev", "gcc", "g++", "upx", "ftp"},
@@ -270,7 +270,7 @@ func Bootstrap() error {
 	if runtime.GOOS == "darwin" {
 		// Install Homebrew
 		if !ExecExists("brew") {
-			log.Info("Installing Homebrew")
+			log.Info("installing homebrew")
 			if err := sh.Run("/bin/bash", "-c", `"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`); err != nil {
 				return log.Error(err)
 			}
@@ -279,14 +279,14 @@ func Bootstrap() error {
 		// Install xcode cli tools
 		if ExecExists("xcode-select") {
 			if err := sh.Run("xcode-select", "-p"); err != nil {
-				log.Info("Installing xcode cli tools")
+				log.Info("installing xcode cli tools")
 				if err := sh.Run("xcode-select", "--install"); err != nil {
 					return log.Error(err)
 				}
 			}
 		}
 
-		log.Info("Installing required macOS packages")
+		log.Info("installing required macos packages")
 		err := RunSync([][]string{
 			{"brew", "install", "upx"},
 		})
@@ -298,7 +298,7 @@ func Bootstrap() error {
 
 	// Install mage bootstrap (the recommended, as seen in https://magefile.org)
 	if !ExecExists("mage") && ExecExists("git") {
-		log.Info("Installing mage")
+		log.Info("installing mage")
 		tmpDir := "__tmp_mage"
 
 		if err := sh.Run("git", "clone", "https://github.com/magefile/mage", tmpDir); err != nil {
@@ -321,7 +321,7 @@ func Bootstrap() error {
 	}
 
 	// Install Go dependencies
-	log.Info("Installing Go dependencies")
+	log.Info("installing go dependencies")
 	return RunSync([][]string{
 		{"go", "mod", "vendor"},
 		{"go", "mod", "tidy"},
