@@ -5,6 +5,7 @@ go 1.22
 toolchain go1.22.0
 
 require (
+	github.com/fatih/color v1.16.0
 	github.com/magefile/mage v1.15.0
 	github.com/pkg/sftp v1.13.6
 	github.com/wailsapp/wails/v2 v2.8.0
@@ -34,7 +35,6 @@ require (
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/dnephin/pflag v1.0.7 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
-	github.com/fatih/color v1.16.0 // indirect
 	github.com/flytam/filenamify v1.2.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect

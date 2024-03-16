@@ -3,8 +3,6 @@
 package main
 
 import (
-	// "github.com/magefile/mage/mg"
-
 	"fmt"
 	"os"
 	"path"
@@ -32,6 +30,8 @@ var Aliases = map[string]interface{}{
 
 // Start development server (opens app window with live reload)
 func Dev() error {
+	log := NewLogger()
+	defer log.End()
 	return sh.Run("wails", "dev")
 }
 
@@ -41,6 +41,8 @@ func Dev() error {
 
 // Runs both Go, and frontend tests
 func (Test) All() error {
+	log := NewLogger()
+	defer log.End()
 	return RunSync([][]string{
 		{"gotestsum", "--format", "pkgname", "--", "--cover", "./..."},
 		{"yarn", "--cwd", "frontend", "test:coverage"},
@@ -49,6 +51,8 @@ func (Test) All() error {
 
 // Runs Go tests
 func (Test) Go() error {
+	log := NewLogger()
+	defer log.End()
 	return RunSync([][]string{
 		{"gotestsum", "--format", "pkgname", "--", "--cover", "./..."},
 	})
@@ -56,6 +60,8 @@ func (Test) Go() error {
 
 // Runs frontend tests
 func (Test) Frontend() error {
+	log := NewLogger()
+	defer log.End()
 	return RunSync([][]string{
 		{"yarn", "--cwd", "frontend", "test:coverage"},
 	})
@@ -67,6 +73,9 @@ func (Test) Frontend() error {
 
 // Create a debug development build (expect the output filesize to be much bigger)
 func (Build) Debug() error {
+	log := NewLogger()
+	defer log.End()
+	log.Info("compiling debug binary")
 	return sh.Run(
 		"wails",
 		"build",
@@ -78,6 +87,9 @@ func (Build) Debug() error {
 
 // Create a release build
 func (Build) Release() error {
+	log := NewLogger()
+	defer log.End()
+	log.Info("compiling release binary")
 	return sh.Run(
 		"wails",
 		"build",
@@ -94,15 +106,44 @@ func (Build) Release() error {
 // Release
 // ----------------------------------------------------------------------------
 
-// @TODO: Prep for release (zip, rename, etc...)
-// func (Release) Prepare() error {
-// 	return RunSync([][]string{
-// 		{"mage", "-v", "ftp"},
-// 	})
-// }
+// Prep for release (rename & zip)
+func (Release) Prepare() error {
+	log := NewLogger()
+	defer log.End()
+
+	binaryFileName := os.Getenv("BINARY_FILENAME")
+	releaseVersion := os.Getenv("RELEASE_VERSION")
+	binPath := "build/bin"
+	binaryFilePath := fmt.Sprintf("%s/%s", binPath, binaryFileName)
+
+	if binaryFileName == "" || releaseVersion == "" {
+		return log.Error("required environment variables not set")
+	}
+
+	log.Info("checking release binary")
+
+	if _, err := os.Stat(binaryFilePath); os.IsNotExist(err) {
+		return log.Error("failed to find release binary file:", binaryFilePath)
+	}
+
+	log.Info("zip for release")
+
+	zipFileName := fmt.Sprintf("adrift-native_%s_%s_%s.zip", releaseVersion, runtime.GOOS, runtime.GOARCH)
+	zipFilePath := fmt.Sprintf("%s/%s", binPath, zipFileName)
+
+	err := ZipFiles(zipFilePath, binaryFilePath)
+	if err != nil {
+		return log.Error("failed to zip binary", err)
+	}
+
+	return nil
+}
 
 // Upload release binaries to FTP server
 func (Release) FTP() error {
+	log := NewLogger()
+	defer log.End()
+
 	ftpHost := os.Getenv("FTP_HOST")
 	ftpUsername := os.Getenv("FTP_USERNAME")
 	ftpPassword := os.Getenv("FTP_PASSWORD")
@@ -111,13 +152,13 @@ func (Release) FTP() error {
 	releaseVersion := os.Getenv("RELEASE_VERSION")
 	ftpReleasePath := path.Join(ftpPath, releaseVersion)
 
-	fmt.Println("(Release) => FTP upload path: " + ftpReleasePath)
+	log.Info("ftp upload path: ", ftpReleasePath)
 
-	if ftpHost == "" || ftpUsername == "" || ftpPassword == "" || ftpPath == "" || localPath == "" {
-		return fmt.Errorf("(Release) => required FTP environment variables not set")
+	if ftpHost == "" || ftpUsername == "" || ftpPassword == "" || ftpPath == "" || localPath == "" || releaseVersion == "" {
+		return log.Error("required FTP environment variables not set")
 	}
 
-	// (FTP) Connect
+	log.Info("connecting to ftp server")
 
 	config := &ssh.ClientConfig{
 		User: ftpUsername,
@@ -129,38 +170,38 @@ func (Release) FTP() error {
 
 	conn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%s", ftpHost, "22"), config)
 	if err != nil {
-		return fmt.Errorf("(Release) => failed to connect to SFTP server: %v", err)
+		return log.Error("failed to connect to SFTP server:", err)
 	}
 	defer conn.Close()
 
 	client, err := sftp.NewClient(conn)
 	if err != nil {
-		return fmt.Errorf("(Release) => failed to create SFTP client: %v", err)
+		return log.Error("failed to create SFTP client:", err)
 	}
 	defer client.Close()
 
-	// (FTP) Create release directory
+	log.Info("create remote release directory")
 
 	err = client.Mkdir(ftpReleasePath)
 	if err != nil && !os.IsExist(err) {
 		// If the directory already exists, ignore the error
-		return fmt.Errorf("(Release) => failed to create directory on SFTP server: %v", err)
+		return log.Error("failed to create directory on SFTP server:", err)
 	}
 
-	// (Local) Open local path
+	log.Info("reading local release files")
 
 	localDir, err := os.Open(localPath)
 	if err != nil {
-		return fmt.Errorf("(Release) => failed to open local directory: %v", err)
+		return log.Error("failed to open local directory:", err)
 	}
 	defer localDir.Close()
 
 	files, err := localDir.Readdir(-1)
 	if err != nil {
-		return fmt.Errorf("(Release) => failed to read local directory: %v", err)
+		return log.Error("failed to read local directory:", err)
 	}
 
-	// (Local -> FTP) Upload files
+	log.Info("uploading release files to ftp server")
 
 	for _, file := range files {
 		if !file.IsDir() {
@@ -169,19 +210,19 @@ func (Release) FTP() error {
 
 			localFile, err := os.Open(localFilePath)
 			if err != nil {
-				return fmt.Errorf("failed to open local file: %v", err)
+				return log.Error("failed to open local file:", err)
 			}
 			defer localFile.Close()
 
 			remoteFile, err := client.Create(remoteFilePath)
 			if err != nil {
-				return fmt.Errorf("failed to create remote file: %v", err)
+				return log.Error("failed to create remote file:", err)
 			}
 			defer remoteFile.Close()
 
 			_, err = remoteFile.ReadFrom(localFile)
 			if err != nil {
-				return fmt.Errorf("failed to upload file to SFTP server: %v", err)
+				return log.Error("failed to upload file to SFTP server:", err)
 			}
 		}
 	}
@@ -195,17 +236,20 @@ func (Release) FTP() error {
 
 // Bootstraps required packages (installs required linux/macOS packages if needed)
 func Bootstrap() error {
+	log := NewLogger()
+	defer log.End()
+
 	// Install required linux packages
 	if runtime.GOOS == "linux" {
 		if ExecExists("apt") {
-			fmt.Println("(Bootstrap) => Installing required linux packages")
+			log.Info("installing required linux packages")
 			err := RunSync([][]string{
 				{"sudo", "apt", "update", "-y"},
 				{"sudo", "apt", "install", "-y", "libgtk-3-dev", "libwebkit2gtk-4.0-dev", "gcc", "g++", "upx", "ftp"},
 			})
 
 			if err != nil {
-				return err
+				return log.Error(err)
 			}
 		}
 	}
@@ -214,62 +258,58 @@ func Bootstrap() error {
 	if runtime.GOOS == "darwin" {
 		// Install Homebrew
 		if !ExecExists("brew") {
-			fmt.Println("(Bootstrap) => Installing Homebrew")
+			log.Info("installing homebrew")
 			if err := sh.Run("/bin/bash", "-c", `"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`); err != nil {
-				return err
+				return log.Error(err)
 			}
 		}
 
 		// Install xcode cli tools
 		if ExecExists("xcode-select") {
 			if err := sh.Run("xcode-select", "-p"); err != nil {
-				fmt.Println("(Bootstrap) => Installing xcode cli tools")
+				log.Info("installing xcode cli tools")
 				if err := sh.Run("xcode-select", "--install"); err != nil {
-					return err
+					return log.Error(err)
 				}
 			}
 		}
 
-		fmt.Println("(Bootstrap) => Installing required macOS packages")
+		log.Info("installing required macos packages")
 		err := RunSync([][]string{
 			{"brew", "install", "upx"},
 		})
 
 		if err != nil {
-			return err
+			return log.Error(err)
 		}
 	}
 
 	// Install mage bootstrap (the recommended, as seen in https://magefile.org)
 	if !ExecExists("mage") && ExecExists("git") {
-		fmt.Println("(Bootstrap) => Installing mage")
+		log.Info("installing mage")
 		tmpDir := "__tmp_mage"
 
 		if err := sh.Run("git", "clone", "https://github.com/magefile/mage", tmpDir); err != nil {
-			fmt.Println("(Bootstrap) => ERROR: installing mage", err)
-			return err
+			return log.Error("error: installing mage: ", err)
 		}
 
 		if err := os.Chdir(tmpDir); err != nil {
-			fmt.Println("(Bootstrap) => ERROR: installing mage", err)
-			return err
+			return log.Error("error: installing mage: ", err)
 		}
 
 		if err := sh.Run("go", "run", "bootstrap.go"); err != nil {
-			fmt.Println("(Bootstrap) => ERROR: installing mage", err)
-			return err
+			return log.Error("error: installing mage: ", err)
 		}
 
 		if err := os.Chdir("../"); err != nil {
-			fmt.Println("(Bootstrap) => ERROR: installing mage", err)
-			return err
+			return log.Error("error: installing mage: ", err)
 		}
 
 		os.RemoveAll(tmpDir)
 	}
 
 	// Install Go dependencies
-	fmt.Println("(Bootstrap) => Installing Go dependencies")
+	log.Info("installing go dependencies")
 	return RunSync([][]string{
 		{"go", "mod", "vendor"},
 		{"go", "mod", "tidy"},
@@ -283,6 +323,8 @@ func Bootstrap() error {
 
 // Update all Go dependencies
 func UpdateDeps() error {
+	log := NewLogger()
+	defer log.End()
 	return RunSync([][]string{
 		{"go", "get", "-u", "all"},
 		{"go", "mod", "vendor"},

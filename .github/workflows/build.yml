@@ -23,16 +23,16 @@ jobs:
             matrix:
                 build:
                     - name: app_build
-                      platformShort: linux
-                      platform: linux/amd64
+                      platform: linux
+                      arch: amd64
                       os: ubuntu-latest
                     - name: app_build
-                      platformShort: windows
-                      platform: windows/amd64
+                      platform: windows
+                      arch: amd64
                       os: windows-latest
                     - name: app_build
-                      platformShort: darwin
-                      platform: darwin/universal
+                      platform: darwin
+                      arch: amd64
                       os: macos-latest
         runs-on: ${{ matrix.build.os }}
         steps:
@@ -49,28 +49,29 @@ jobs:
               id: binary_variables
               shell: bash
               run: |
-                  binary_name="adrift-native-${{ matrix.build.platformShort }}"
-                  echo "::set-output name=binary_name::${binary_name}"
                   case "${{ runner.os }}" in
                     Linux)
-                      echo "::set-output name=binary_suffix::"
-                      mv -f "./build/bin/adrift-native" "./build/bin/${binary_name}"
+                      export BINARY_SUFFIX=
                       ;;
                     Windows)
-                      echo "::set-output name=binary_suffix::.exe"
-                      mv -f "./build/bin/adrift-native.exe" "./build/bin/${binary_name}.exe"
+                      export BINARY_SUFFIX=.exe
                       ;;
                     macOS)
-                      echo "::set-output name=binary_suffix::"
-                      mv -f "./build/bin/Adrift Native.app/Contents/MacOS/Adrift Native" "./build/bin/${binary_name}"
+                      export BINARY_SUFFIX=
+                      mv -f "./build/bin/Adrift Native.app/Contents/MacOS/Adrift Native" "./build/bin/adrift-native"
                       ;;
                   esac
+                  export BINARY_FILENAME=adrift-native${BINARY_SUFFIX}
+                  export RELEASE_VERSION=${{ github.ref_name }}
+                  mage -v release:prepare
+                  export RELEASE_FILENAME=adrift-native_${{ github.ref_name }}_${{ matrix.build.platform }}_${{ matrix.build.arch }}.zip
+                  echo "::set-output name=RELEASE_FILENAME::${RELEASE_FILENAME}"
 
             - name: Upload binary artifact
               uses: actions/upload-artifact@v4
               with:
-                  name: ${{ steps.binary_variables.outputs.binary_name }}
-                  path: ./build/bin/${{ steps.binary_variables.outputs.binary_name }}${{ steps.binary_variables.outputs.binary_suffix }}
+                  name: ${{ steps.binary_variables.outputs.RELEASE_FILENAME }}
+                  path: ./build/bin/${{ steps.binary_variables.outputs.RELEASE_FILENAME }}
 
     #
     # Release binaries to various platforms. E.g. FTP server, GitHub releases.
@@ -96,7 +97,7 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   path: adrift-native
-                  pattern: adrift-native-*
+                  pattern: adrift-native*
                   merge-multiple: true
 
             - name: Release to FTP
@@ -120,6 +121,6 @@ jobs:
                   draft: true
                   prerelease: false
                   files: |
-                      ./adrift-native/adrift-native-darwin
-                      ./adrift-native/adrift-native-linux
-                      ./adrift-native/adrift-native-windows.exe
+                      ./adrift-native/adrift-native_${{ github.ref_name }}_darwin_amd64.zip
+                      ./adrift-native/adrift-native_${{ github.ref_name }}_linux_amd64.zip
+                      ./adrift-native/adrift-native_${{ github.ref_name }}_windows_amd64.zip
