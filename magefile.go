@@ -117,35 +117,24 @@ func (Release) Prepare() error {
 	binPath := "build/bin"
 	binaryFilePath := fmt.Sprintf("%s/%s", binPath, binaryFileName)
 
-	log.Info("finding release binary")
-
 	if binaryFileName == "" || releaseVersion == "" {
 		return log.Error("required environment variables not set")
 	}
 
+	log.Info("checking release binary")
+
 	if _, err := os.Stat(binaryFilePath); os.IsNotExist(err) {
-		return log.Error("Failed to find release binary file:", binaryFilePath)
+		return log.Error("failed to find release binary file:", binaryFilePath)
 	}
 
-	log.Info("renaming binary for release")
+	log.Info("zip for release")
 
-	newFileName := fmt.Sprintf("adrift-native_%s_%s_%s", releaseVersion, runtime.GOOS, runtime.GOARCH)
-	if runtime.GOOS == "windows" {
-		newFileName += ".exe"
-	}
-	newFilePath := fmt.Sprintf("%s/%s", binPath, newFileName)
-	zipFilePath := fmt.Sprintf("%s.zip", strings.TrimSuffix(newFilePath, ".exe"))
+	zipFileName := fmt.Sprintf("adrift-native_%s_%s_%s.zip", releaseVersion, runtime.GOOS, runtime.GOARCH)
+	zipFilePath := fmt.Sprintf("%s/%s", binPath, zipFileName)
 
-	err := os.Rename(binaryFilePath, newFilePath)
+	err := ZipFiles(zipFilePath, binaryFilePath)
 	if err != nil {
-		return log.Error("Failed to rename binary `%s` to `%s`: %v", binaryFileName, newFileName, err)
-	}
-
-	log.Info("zip binary for release")
-
-	err = ZipFiles(zipFilePath, newFilePath)
-	if err != nil {
-		return log.Error("Failed to zip binary", err)
+		return log.Error("failed to zip binary", err)
 	}
 
 	return nil
