@@ -1,4 +1,5 @@
-import { css, cx } from "@linaria/core";
+import { css } from "@linaria/atomic";
+import { cx } from "@linaria/core";
 import { useEffect, useRef } from "react";
 
 import { Image, ImageProps } from "../Image";

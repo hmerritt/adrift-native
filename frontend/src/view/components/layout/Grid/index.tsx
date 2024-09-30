@@ -1,4 +1,5 @@
-import { css, cx } from "@linaria/core";
+import { cx } from "@linaria/core";
+import { css } from '@linaria/atomic';
 
 export type GridProps = JSX.IntrinsicElements["div"] & {
 	maxWidth?: string | number;

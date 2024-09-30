@@ -6,7 +6,7 @@ export type PlausibleEvents = "pageview";
 /**
  * Plausible Analytics - https://plausible.io.
  *
- * Enable and configure env in `/bootstrap.cjs`.
+ * Enable and configure env in `/bootstrap.ts`.
  */
 export const plausible = Plausible({
 	domain: env.plausible.domain || location.hostname,

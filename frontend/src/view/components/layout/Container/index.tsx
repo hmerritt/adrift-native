@@ -1,10 +1,5 @@
 import { css, cx } from "@linaria/core";
 
-export type ContainerProps = JSX.IntrinsicElements["div"] & {
-	width?: string;
-	padding?: string;
-};
-
 // @TODO: improve this
 
 export const Container = ({
@@ -13,7 +8,10 @@ export const Container = ({
 	style,
 	width = "1320px",
 	...props
-}: ContainerProps) => {
+}: JSX.IntrinsicElements["div"] & {
+	width?: string;
+	padding?: string;
+}) => {
 	return (
 		<div
 			className={cx(container, className)}

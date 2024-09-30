@@ -1,15 +1,16 @@
-import { memo, SVGProps } from "react";
-import { css } from "@linaria/core";
+import { css } from "@linaria/atomic";
+import { cx } from "@linaria/core";
+import { SVGProps, memo } from "react";
 
 export const Spinner = memo((props: SVGProps<SVGSVGElement>) => (
 	<svg
-		className={spinner}
+		className={cx(spinner)}
 		viewBox="0 0 66 66"
 		xmlns="http://www.w3.org/2000/svg"
 		{...props}
 	>
 		<circle
-			className={path}
+			className={cx(path)}
 			strokeWidth="6"
 			strokeLinecap="round"
 			stroke="currentColor"

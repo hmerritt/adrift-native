@@ -1,46 +1,54 @@
-// @ts-nocheck
-const util = require("util");
-const exec = require("child_process").exec;
+import execBase from "child_process";
+import path from "path";
+import { fileURLToPath } from "url";
+import util from "util";
+
+import { adriftVersion } from "./version";
+
+const exec = execBase.exec;
 const execAwait = util.promisify(exec);
 
-const { adriftVersion } = require("./version.cjs");
+export type Env = [string, any][];
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Bootstrap runs code before react start/build.
  *
  * Injects ENV array into cross-env before running script
  */
-async function bootstrap(env, allowEnvOverride, args, path) {
+export async function bootstrap(
+	env: Env,
+	allowEnvOverride: boolean | undefined,
+	args = [] as string[],
+	path: string | undefined
+) {
 	try {
 		// Build ENV + Arguments string
 		const envArr = allowEnvOverride ? overrideHardcodedENV(env) : env;
 		const envString = buildENV(envArr);
-		const argString = args?.length > 0 ? args.join(" ") : "";
+		const argString = args?.length > 0 ? args?.join(" ") : "";
 
 		// Run scripts/start|build command
-		runStream(
-			`npx cross-env ${envString} ${argString}`,
-			path
-		);
+		runStream(`yarn cross-env ${envString} ${argString}`, path);
 	} catch (error) {
 		console.error("[bootstrap]", error);
 	}
 }
 
 /**
- * Shortens a string at both ends, separated by '...', eg '123456789' -> '12345...789'
+ * Shortens a string at both ends, separated by `...`, eg `123456789` -> `12345...789`
  */
-function shorten(str, numCharsStart = 6, numCharsEnd = 4) {
-	if (str?.length <= 11) return str;
-	return `${str.substring(0, numCharsStart)}...${str.slice(
-		str.length - numCharsEnd
-	)}`;
+export function shorten(str: string | undefined, numCharsStart = 6, numCharsEnd = 4) {
+	if (!str || str?.length <= 11) return str;
+	return `${str.substring(0, numCharsStart)}...${str.slice(str.length - numCharsEnd)}`;
 }
 
 /**
  * Returns the current git branch
  */
-async function getGitBranch(path, fallback = undefined) {
+export async function getGitBranch(path: string, fallback = undefined) {
 	let gitBranch = await run(`git rev-parse --abbrev-ref HEAD`, path, null);
 
 	// Detect CircleCI
@@ -49,7 +57,6 @@ async function getGitBranch(path, fallback = undefined) {
 	}
 
 	// Detect GitHub Actions CI
-	// prettier-ignore
 	if (process.env.GITHUB_REF_NAME && process.env.GITHUB_REF_TYPE === "branch") {
 		gitBranch = process.env.GITHUB_REF_NAME;
 	}
@@ -75,10 +82,10 @@ async function getGitBranch(path, fallback = undefined) {
 /**
  * Use ENV values in current environment over hardcoded values
  */
-function overrideHardcodedENV(env = []) {
+export function overrideHardcodedENV(env = [] as Env) {
 	let overrideCount = 0;
 
-	const newEnv = env.map((envItem) => {
+	const newEnv: Env = env.map((envItem) => {
 		const [name, value] = envItem;
 		const envValue = process.env[name];
 
@@ -101,7 +108,7 @@ function overrideHardcodedENV(env = []) {
 /**
  * Handles ENV array and build a string to use
  */
-function buildENV(env = []) {
+export function buildENV(env = [] as Env) {
 	if (env.length < 1) return "";
 
 	console.log("Building ENV to inject:");
@@ -123,7 +130,11 @@ function buildENV(env = []) {
 /**
  * Execute OS commands, awaits response from stdout
  */
-async function run(command, path = __dirname, fallback = undefined) {
+export async function run(
+	command: string,
+	path = __dirname,
+	fallback = undefined as any
+) {
 	try {
 		const { stdout, stderr } = await execAwait(command, { cwd: path });
 		return stdout?.trim();
@@ -141,11 +152,11 @@ async function run(command, path = __dirname, fallback = undefined) {
 /**
  * Execute OS commands, streams response from stdout
  */
-function runStream(command, path = __dirname, exitOnError = true) {
+export function runStream(command: string, path = __dirname, exitOnError = true) {
 	const execProcess = exec(command, { cwd: path });
 
-	execProcess.stdout.pipe(process.stdout);
-	execProcess.stderr.pipe(process.stderr);
+	execProcess.stdout?.pipe(process.stdout);
+	execProcess.stderr?.pipe(process.stderr);
 
 	execProcess.on("exit", (code) => {
 		if (code !== 0) {
@@ -155,20 +166,20 @@ function runStream(command, path = __dirname, exitOnError = true) {
 	});
 }
 
-function isProd(args) {
+export function isProd(args = [] as string[]) {
 	return args.length >= 2 && (args[1] === "build" || args[1] === "preview");
 }
 
-function isTest(args) {
+export function isTest(args = [] as string[]) {
 	return args.length >= 1 && args[0] === "vitest";
 }
 
 /**
  * Determine `NODE_ENV` from args passed to the script.
- * 
+ *
  * @returns `NODE_ENV` value
  */
-function getNodeEnv(args) {
+export function getNodeEnv(args = [] as string[]) {
 	switch (true) {
 		case isProd(args):
 			return "production";
@@ -181,12 +192,17 @@ function getNodeEnv(args) {
 
 /**
  * Returns version string including app name, version, git branch, and commit hash.
- * 
+ *
  * This has been refactored from `/src/lib/global/version.ts`. @TODO make shared function and remove this one.
  *
  * E.g `App [Version 1.0.0 (development 4122b6...dc7c)]`
  */
-const versionString = (appName = undefined, appVersion = undefined, gitBranch = undefined, gitCommitHash = undefined) => {
+export const versionString = (
+	appName = undefined as string | undefined,
+	appVersion = undefined as string | undefined,
+	gitBranch = undefined as string | undefined,
+	gitCommitHash = undefined as string | undefined
+) => {
 	if (!appVersion) {
 		return `${appName} [Version unknown]`;
 	}
@@ -208,17 +224,4 @@ const versionString = (appName = undefined, appVersion = undefined, gitBranch = 
 	if (adriftVersion) versionString += ` with \x1b[36madrift@${adriftVersion}\x1b[0m`;
 
 	return versionString;
-};
-
-
-module.exports = {
-	bootstrap,
-	buildENV,
-	getGitBranch,
-	overrideHardcodedENV,
-	run,
-	runStream,
-	shorten,
-	getNodeEnv,
-	versionString
 };

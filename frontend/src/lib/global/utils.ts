@@ -1,3 +1,5 @@
+import { logn } from "./log";
+
 /**
  * Returns global object to use.
  *
@@ -38,8 +40,32 @@ export const parseEnv = (value: any, isJson = false) => {
 	if (value === "null") return null;
 	if (isJson) {
 		try {
-			return JSON.parse(value);
-		} catch (e) {}
+			return JSON.parse(value ?? "");
+		} catch (e) {
+			logn("parseEnv", "error", "JSON value failed to parse", value, e);
+		}
 	}
 	return value;
+};
+
+/**
+ * Safely run async task, catching and returning any errors as a variable (similar to Go).
+ *
+ * @example const [error, result] = await run(myPromise())
+ */
+export const safeAwait = async <T, E = Error>(
+	promise: Promise<T> | T
+): Promise<[T, null] | [null, E]> => {
+	try {
+		const result = await promise;
+		return [result, null];
+	} catch (error) {
+		return [null, error as E];
+	}
+};
+
+export type SafeAwaitFn = typeof safeAwait;
+
+export const injectSafeAwait = () => {
+	setGlobalValue("safeAwait", safeAwait);
 };

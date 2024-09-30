@@ -14,22 +14,12 @@ body {
 	-webkit-font-smoothing: antialiased;
 }
 
+// @TODO Find a way to remove these:
+
 .hidden {
 	opacity: 0;
 }
 
 .none {
 	display: none;
-}
-
-.text-overflow-ellipsis {
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
-/* Removes the blue highlight from touch events in Chrome */
-.touch-highlight-disable {
-	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-	-webkit-tap-highlight-color: transparent;
 }

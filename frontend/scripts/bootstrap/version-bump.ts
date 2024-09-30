@@ -1,5 +1,4 @@
-// @ts-nocheck
-const { bumpAdriftPatchVersion } = require("./version.cjs");
+import { bumpAdriftPatchVersion } from "./version";
 
 /**
  * Script to automatically bump the adrift `patch` version number.

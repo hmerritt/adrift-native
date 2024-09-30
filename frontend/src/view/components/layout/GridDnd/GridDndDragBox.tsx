@@ -1,4 +1,5 @@
-import { css } from "@linaria/core";
+import { cx } from "@linaria/core";
+import { css } from '@linaria/atomic';
 
 export type GridDndDragBoxProps = {
 	dataItem: any;
@@ -20,7 +21,7 @@ export const GridDndDragBox = ({
 	const RenderWith = renderWith;
 
 	return (
-		<div className={gridDragbox}>
+		<div className={cx(gridDragbox)}>
 			<RenderWith {...dataItem} renderIndex={renderIndex} />
 		</div>
 	);

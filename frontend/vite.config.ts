@@ -1,13 +1,18 @@
-import { TanStackRouterVite } from "@tanstack/router-vite-plugin";
+import * as sass from "sass";
+//@ts-ignore Complaining that the export does not exist, when in fact it does
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
+import linaria from "@wyw-in-js/vite";
 import { injectManifest } from "rollup-plugin-workbox";
-import { defineConfig } from "vite";
+import { type UserConfig, defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
-import type { UserConfig as VitestUserConfig } from "vitest/config";
-
-import linaria from "./config/linaria-rollup";
+import { type InlineConfig } from "vitest";
 
 const isDev = process.env.NODE_ENV !== "production";
+
+interface ViteConfig extends UserConfig {
+	test: InlineConfig;
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -18,6 +23,13 @@ export default defineConfig({
 	define: {
 		"process.env": {}
 	},
+	css: {
+		preprocessorOptions: {
+			scss: {
+				api: "modern-compiler"
+			}
+		}
+	},
 	plugins: [
 		react(),
 		tsconfigPaths(),
@@ -26,7 +38,15 @@ export default defineConfig({
 		}),
 		linaria({
 			sourceMap: isDev,
-			preprocessor: "none",
+			preprocessor: (selector, cssText) => {
+				try {
+					const result = sass.compileString(`${selector} {${cssText}}\n`);
+					return result.css.toString();
+				} catch (error) {
+					console.error("Error processing SCSS:", error);
+					return "";
+				}
+			},
 			exclude: ["src/global/**", "**/*.test.{ts,tsx}"],
 			include: ["**/*.{ts,tsx}"]
 		}),
@@ -55,4 +75,4 @@ export default defineConfig({
 		// Debug
 		logHeapUsage: true
 	}
-});
+} as ViteConfig);

@@ -14,10 +14,12 @@ import { injectDevTools } from "./devTools";
 import { injectEnv } from "./env";
 import { injectFeature } from "./featureFlags";
 import { injectLog } from "./log";
+import { injectSafeAwait } from "./utils";
 import { versionString } from "./version";
 
 export const globalInit = () => {
 	// Inject global functions.
+	injectSafeAwait();
 	injectEnv();
 	injectLog();
 	injectFeature();

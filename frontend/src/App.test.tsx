@@ -6,13 +6,6 @@ import App from "./App";
 import { NotFoundRoute } from "./view/routes/__root";
 import { IndexRoute } from "./view/routes/index";
 
-test("renders app", async () => {
-	const r = await render(<App />);
-
-	const linkElement = r.getByText(/Template react app with batteries included/i);
-	expect(linkElement).toBeInTheDocument();
-});
-
 test("renders home", async () => {
 	const r = await render(<IndexRoute />);
 

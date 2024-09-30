@@ -16,9 +16,11 @@ export const render = async (ui: Element, skipWaitFor = false) => {
 	const Wrapper: WrapperType = ({ children }) => {
 		return (
 			<RouterProvider
-				router={createTestRouter(
-					<div data-testid={internalTestId}>{children}</div>
-				)}
+				router={
+					createTestRouter(
+						<div data-testid={internalTestId}>{children}</div>
+					) as any
+				}
 			/>
 		);
 	};

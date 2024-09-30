@@ -8,6 +8,13 @@ const mixins = `
         transition: all, 80ms, ease;
     }
 
+    /* Long text go like this... */
+    @mixin text-ellipsis {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
     /* Grid: RAM (Repeat, Auto, Minmax) */
     @mixin gridColumnsRAM($min: 150px, $max: 1fr) {
         grid-template-columns: repeat(auto-fit, minmax($min, $max));
@@ -19,7 +26,7 @@ const mixins = `
     }
 
     /* Scrollbar styles */
-    @mixin scrollbar($width: 1rem, $height: 1rem, $bgTrack: transparent, $bgThumb: lighten(#181818, 60%), $bgThumbHover: lighten(#181818, 40%)) {
+    @mixin scrollbar($width: 1rem, $height: 1rem, $bgTrack: transparent, $bgThumb: #b1b1b1, $bgThumbHover: #7e7e7e) {
         ::-webkit-scrollbar {
             width: $width;
             height: $height;

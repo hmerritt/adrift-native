@@ -1,5 +1,3 @@
-export const getKeys = Object.keys as <T extends object>(obj: T) => Array<keyof T>;
-
 /**
  * Deep `keyof` of a nested object. INCLUDES root key as well as all nested.
  *

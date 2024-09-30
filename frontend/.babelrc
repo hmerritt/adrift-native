@@ -4,5 +4,6 @@
 			"compact": false
 		}
 	},
-	"presets": ["react-app", "@wyw-in-js"]
+	"presets": ["react-app", "@wyw-in-js"],
+	"plugins": ["babel-plugin-react-compiler"]
 }

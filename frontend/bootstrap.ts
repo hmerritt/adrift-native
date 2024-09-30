@@ -1,8 +1,13 @@
-#!/usr/bin/env node
-const core = require("./scripts/bootstrap/core.cjs");
-const { adriftVersion, isAdriftUpdateAvailable } = require("./scripts/bootstrap/version.cjs");
-const packageJSON = require("./package.json");
+import path from "path";
+import { fileURLToPath } from "url";
 
+import * as core from "./scripts/bootstrap/core";
+import packageJSON from "./package.json";
+import { type Env } from "./scripts/bootstrap/core";
+import { adriftVersion, isAdriftUpdateAvailable } from "./scripts/bootstrap/version";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const pathRoot = __dirname;
 const args = process.argv.slice(2);
 
@@ -14,7 +19,7 @@ bootstrap();
 // prettier-ignore
 async function bootstrap() {
 	const gitCommitHash = await core.run(`git rev-parse HEAD`, pathRoot, '');
-	const gitCommitHashShort = gitCommitHash ? core.shorten(gitCommitHash) : '';
+	const gitCommitHashShort = core.shorten(gitCommitHash) || '';
 	const gitBranch = await core.getGitBranch(pathRoot);
 	const appVersion = packageJSON?.version;
 	const appName = packageJSON?.name;
@@ -26,14 +31,14 @@ async function bootstrap() {
 	const allowEnvOverride = true;
 
 	// Set ENV array to inject, key/value
-	const env = [
+	const env: Env = [
 		["NODE_ENV", core.getNodeEnv(args)],
 		["GENERATE_SOURCEMAP", core.getNodeEnv(args) === "development"],
 		["VITE_ADRIFT_VERSION", adriftVersion],
 		["VITE_NAME", appName],
 		["VITE_VERSION", appVersion],
 		["VITE_GIT_BRANCH", gitBranch],
-		["VITE_GIT_COMMIT", gitCommitHashShort],
+		["VITE_GIT_COMMIT", gitCommitHashShort]
 		// ['VITE_PLAUSIBLE_ENABLE', true],
 		// ['VITE_PLAUSIBLE_DOMAIN', 'PLAUSIBLE_DOMAIN'],
 		// ['VITE_PLAUSIBLE_API_HOST', 'https://plausible.io']

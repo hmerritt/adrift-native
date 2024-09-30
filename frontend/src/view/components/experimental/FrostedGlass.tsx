@@ -1,4 +1,5 @@
-import { css, cx } from "@linaria/core";
+import { css } from "@linaria/atomic";
+import { cx } from "@linaria/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export type FrostedGlassProps = JSX.IntrinsicElements["div"] & {

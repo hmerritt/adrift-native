@@ -1,4 +1,5 @@
-import { css, cx } from "@linaria/core";
+import { css } from "@linaria/atomic";
+import { cx } from "@linaria/core";
 import { RefObject, useCallback, useEffect, useRef } from "react";
 
 export type DotGridProps = JSX.IntrinsicElements["canvas"] & {
@@ -40,8 +41,8 @@ export const DotGrid: React.FC<DotGridProps> = ({
 	...canvasProps
 }) => {
 	const $canvas = useRef<HTMLCanvasElement>(null);
-	const mousePosition = useRef({ x: -1000, y: -1000 });
 	const animationFrameHandle = useRef(-1);
+	const mousePosition = useRef({ x: -1000, y: -1000 });
 
 	const resetAnimationFrame = () => {
 		if (animationFrameHandle.current !== -1) {
@@ -142,6 +143,12 @@ export const DotGrid: React.FC<DotGridProps> = ({
 	useEffect(() => {
 		if (!$canvas.current) return;
 
+		drawDotGrid();
+
+		if (reactToWindowResize) {
+			window.addEventListener("resize", drawDotGrid);
+		}
+
 		const trackMousePosition = (e: MouseEvent | TouchEvent) => {
 			if (!$canvas.current) return;
 
@@ -167,8 +174,16 @@ export const DotGrid: React.FC<DotGridProps> = ({
 					y = touch.clientY;
 				}
 			} else if (e.type === "mouseout" || e.type === "touchend") {
-				x = -1000;
-				y = -1000;
+				setTimeout(() => {
+					// If mouse position has changed, abort reset (this means mouse has moved back into tracking area)
+					if (x !== mousePosition.current.x || y !== mousePosition.current.y)
+						return;
+
+					x = -1000;
+					y = -1000;
+					mousePosition.current.x = x;
+					mousePosition.current.y = y;
+				}, 600);
 			}
 
 			mousePosition.current.x = x;
@@ -182,12 +197,6 @@ export const DotGrid: React.FC<DotGridProps> = ({
 		$elForMousePosition.addEventListener("mouseout", trackMousePosition);
 		$elForMousePosition.addEventListener("touchmove", trackMousePosition);
 		$elForMousePosition.addEventListener("touchend", trackMousePosition);
-
-		drawDotGrid();
-
-		if (reactToWindowResize) {
-			window.addEventListener("resize", drawDotGrid);
-		}
 
 		return () => {
 			resetAnimationFrame();
