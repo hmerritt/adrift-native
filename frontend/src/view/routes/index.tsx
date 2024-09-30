@@ -32,7 +32,7 @@ export function IndexRoute() {
 				</Fullscreen>
 			</Stack>
 
-			<DotGrid position="fixed" refForMousePosition="window" spacing={50} />
+			<DotGrid position="fixed" refForMousePosition="window" spacing={25} />
 		</>
 	);
 }
