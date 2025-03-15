@@ -20,6 +20,8 @@ type Options struct {
 	ProjectDirectory string
 	Compiler         string
 	GoModTidy        bool
+	Platform         string
+	Arch             string
 	TsPrefix         string
 	TsSuffix         string
 	TsOutputType     string
@@ -53,7 +55,15 @@ func GenerateBindings(options Options) (string, error) {
 		}
 	}
 
-	stdout, stderr, err = shell.RunCommand(workingDirectory, options.Compiler, "build", "-tags", tagString, "-o", filename)
+	envBuild := os.Environ()
+	arch := options.Arch
+	if arch == "universal" {
+		arch = runtime.GOARCH
+	}
+	envBuild = shell.SetEnv(envBuild, "GOOS", options.Platform)
+	envBuild = shell.SetEnv(envBuild, "GOARCH", arch)
+
+	stdout, stderr, err = shell.RunCommandWithEnv(envBuild, workingDirectory, options.Compiler, "build", "-buildvcs=false", "-tags", tagString, "-o", filename)
 	if err != nil {
 		return stdout, fmt.Errorf("%s\n%s\n%s", stdout, stderr, err)
 	}
