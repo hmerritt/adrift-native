@@ -58,8 +58,8 @@ jobs:
                       ;;
                     macOS)
                       export BINARY_SUFFIX=
-                      if [ -e "./build/bin/Adrift Native.app/Contents/MacOS/Adrift Native" ]; then
-                          mv -f "./build/bin/Adrift Native.app/Contents/MacOS/Adrift Native" "./build/bin/adrift-native"
+                      if [ -e "./build/bin/Adrift Native.app/Contents/MacOS/adrift-native" ]; then
+                          mv -f "./build/bin/Adrift Native.app/Contents/MacOS/adrift-native" "./build/bin/adrift-native"
                       fi
                       ;;
                   esac
