@@ -66,6 +66,7 @@ jobs:
                   export BINARY_FILENAME=adrift-native${BINARY_SUFFIX}
                   export RELEASE_VERSION=${{ github.ref_name }}
                   mage -v release:prepare
+                  ls -a ./build/bin
                   export RELEASE_FILENAME=adrift-native_${{ github.ref_name }}_${{ matrix.build.platform }}_${{ matrix.build.arch }}.zip
                   echo "::set-output name=RELEASE_FILENAME::${RELEASE_FILENAME}"
 
@@ -101,6 +102,11 @@ jobs:
                   path: adrift-native
                   pattern: adrift-native*
                   merge-multiple: true
+
+            - name: List binary artifacts
+              shell: bash
+              run: |
+                  ls -la adrift-native
 
             - name: Release to GitHub via tagged-release
               id: create_release
