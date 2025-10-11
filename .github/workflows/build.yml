@@ -33,7 +33,7 @@ jobs:
                     - name: app_build
                       platform: darwin
                       arch: amd64
-                      os: macos-latest
+                      os: macos-14-large
                     - name: app_build
                       platform: darwin
                       arch: arm64
@@ -69,6 +69,8 @@ jobs:
                   esac
                   export BINARY_FILENAME=adrift-native${BINARY_SUFFIX}
                   export RELEASE_VERSION=${{ github.ref_name }}
+                  export PLATFORM=${{ matrix.build.platform }}
+                  export ARCH=${{ matrix.build.arch }}
                   mage -v release:prepare
                   ls -a ./build/bin
                   export RELEASE_FILENAME=adrift-native_${{ github.ref_name }}_${{ matrix.build.platform }}_${{ matrix.build.arch }}.zip
@@ -124,6 +126,7 @@ jobs:
                   prerelease: false
                   files: |
                       ./adrift-native/adrift-native_${{ github.ref_name }}_darwin_amd64.zip
+                      ./adrift-native/adrift-native_${{ github.ref_name }}_darwin_arm64.zip
                       ./adrift-native/adrift-native_${{ github.ref_name }}_linux_amd64.zip
                       ./adrift-native/adrift-native_${{ github.ref_name }}_windows_amd64.zip
 

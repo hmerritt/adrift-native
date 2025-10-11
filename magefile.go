@@ -133,8 +133,10 @@ func (Release) Prepare() error {
 	log := NewLogger()
 	defer log.End()
 
-	binaryFileName := os.Getenv("BINARY_FILENAME")
-	releaseVersion := os.Getenv("RELEASE_VERSION")
+	binaryFileName := GetEnv("BINARY_FILENAME", "")
+	releaseVersion := GetEnv("RELEASE_VERSION", "")
+	platform := GetEnv("PLATFORM", runtime.GOOS)
+	arch := GetEnv("ARCH", runtime.GOARCH)
 	binPath := "build/bin"
 	binaryFilePath := fmt.Sprintf("%s/%s", binPath, binaryFileName)
 
@@ -150,7 +152,7 @@ func (Release) Prepare() error {
 
 	log.Info("zip for release")
 
-	zipFileName := fmt.Sprintf("adrift-native_%s_%s_%s.zip", releaseVersion, runtime.GOOS, runtime.GOARCH)
+	zipFileName := fmt.Sprintf("adrift-native_%s_%s_%s.zip", releaseVersion, platform, arch)
 	zipFilePath := fmt.Sprintf("%s/%s", binPath, zipFileName)
 
 	err := ZipFiles(zipFilePath, binaryFilePath)
