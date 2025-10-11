@@ -69,8 +69,8 @@ func main() {
 				HideToolbarSeparator:       true,
 			},
 			Appearance:           mac.NSAppearanceNameVibrantLight,
-			WebviewIsTransparent: true,
-			WindowIsTranslucent:  true,
+			WebviewIsTransparent: false,
+			WindowIsTranslucent:  false,
 			About: &mac.AboutInfo{
 				Title:   "Adrift Native",
 				Message: "",
