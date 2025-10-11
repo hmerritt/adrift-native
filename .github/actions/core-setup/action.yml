@@ -25,22 +25,22 @@ runs:
           with:
               install-only: true
 
-        - name: Setup Go 1.22.0
+        - name: Setup Go 1.25.1
           uses: actions/setup-go@v5
           with:
-              go-version: "1.22.0"
+              go-version: "1.25.1"
 
-        - name: Setup Node.js '20.x'
+        - name: Setup Node.js '22.x'
           uses: actions/setup-node@v4
           with:
-              node-version: "20.x"
+              node-version: "22.x"
 
         - name: Setup Yarn
           shell: bash
           run: |
               corepack enable
               corepack prepare yarn@stable --activate
-              yarn set version 3.5.0
+              yarn set version 4.10.2
 
         - name: Setup app frontend
           shell: bash
