@@ -102,16 +102,6 @@ jobs:
                   pattern: adrift-native*
                   merge-multiple: true
 
-            - name: Release to FTP
-              uses: ./.github/actions/core-release-ftp
-              with:
-                  ftp_host: ${{ secrets.FTP_HOST }}
-                  ftp_username: ${{ secrets.FTP_USERNAME }}
-                  ftp_password: ${{ secrets.FTP_PASSWORD }}
-                  ftp_path: ${{ secrets.FTP_PATH }}
-                  local_path: ./adrift-native
-                  release_version: ${{ github.ref_name }}
-
             - name: Release to GitHub via tagged-release
               id: create_release
               uses: softprops/action-gh-release@v2
@@ -126,3 +116,13 @@ jobs:
                       ./adrift-native/adrift-native_${{ github.ref_name }}_darwin_amd64.zip
                       ./adrift-native/adrift-native_${{ github.ref_name }}_linux_amd64.zip
                       ./adrift-native/adrift-native_${{ github.ref_name }}_windows_amd64.zip
+
+            - name: Release to FTP
+              uses: ./.github/actions/core-release-ftp
+              with:
+                  ftp_host: ${{ secrets.FTP_HOST }}
+                  ftp_username: ${{ secrets.FTP_USERNAME }}
+                  ftp_password: ${{ secrets.FTP_PASSWORD }}
+                  ftp_path: ${{ secrets.FTP_PATH }}
+                  local_path: ./adrift-native
+                  release_version: ${{ github.ref_name }}
