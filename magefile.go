@@ -44,7 +44,7 @@ func (Test) All() error {
 	log := NewLogger()
 	defer log.End()
 	return RunSync([][]string{
-		{"gotestsum", "--format", "pkgname", "--", "--cover", "./..."},
+		{"gotestsum", "--format", "pkgname-and-test-fails", "--format-hivis", "--", "--cover", "./..."},
 		{"yarn", "--cwd", "frontend", "test:coverage"},
 	})
 }
@@ -54,7 +54,7 @@ func (Test) Go() error {
 	log := NewLogger()
 	defer log.End()
 	return RunSync([][]string{
-		{"gotestsum", "--format", "pkgname", "--", "--cover", "./..."},
+		{"gotestsum", "--format", "pkgname-and-test-fails", "--format-hivis", "--", "--cover", "./..."},
 	})
 }
 
