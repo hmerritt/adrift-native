@@ -5,11 +5,13 @@ package main
 
 import (
 	"archive/zip"
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	"path"
 	"runtime"
 	"strings"
 	"sync"
@@ -17,9 +19,12 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/magefile/mage/sh"
+	"github.com/pkg/sftp"
+	"golang.org/x/crypto/ssh"
 )
 
 const (
+	APP_NAME    = "adrift-native"                     // version/version_base.go version.AppName
 	MODULE_NAME = "github.com/hmerritt/adrift-native" // go.mod module name
 	LOG_LEVEL   = 4                                   // 5 = debug, 4 = info, 3 = warn, 2 = error
 )
@@ -27,6 +32,60 @@ const (
 // ----------------------------------------------------------------------------
 // Runtime
 // ----------------------------------------------------------------------------
+
+// Runs a single cmd command, and streams the output to stdout
+func RunStream(args []string, dir string, addPadding bool) error {
+	cmd := exec.Command(args[0], args[1:]...)
+
+	if dir != "" {
+		cmd.Dir = dir
+	}
+
+	if addPadding {
+		fmt.Println("")
+	}
+
+	stdout, _ := cmd.StdoutPipe()
+	stderr, _ := cmd.StderrPipe()
+
+	err := cmd.Start()
+
+	if err != nil {
+		return err
+	}
+
+	pipeHandler := func(pipe io.ReadCloser, textColor color.Attribute) {
+		scanner := bufio.NewScanner(pipe)
+		scanner.Split(bufio.ScanLines)
+		for scanner.Scan() {
+			color.Set(textColor)
+			fmt.Println(scanner.Text())
+			color.Unset()
+		}
+	}
+
+	go func() {
+		pipeHandler(stdout, color.Reset)
+	}()
+
+	go func() {
+		pipeHandler(stderr, color.Reset)
+	}()
+
+	cmd.Wait()
+
+	if addPadding {
+		fmt.Println("")
+	}
+
+	exitCode := cmd.ProcessState.ExitCode()
+
+	if exitCode != 0 {
+		return fmt.Errorf("command exited with code %d", exitCode)
+	}
+
+	return nil
+}
 
 // Runs multiple cmd commands one-by-one
 func RunSync(commands [][]string) error {
@@ -116,7 +175,7 @@ func (l *Logger) log(level uint32, a ...interface{}) {
 
 	currentTime := time.Now()
 	formattedTime := currentTime.Format("2006-01-02 15:04:05")
-	toLog := fmt.Sprintf("%s (%s) +%7s => ", formattedTime, l.FnInitName, DurationSince(l.PrevTimestamp))
+	toLog := fmt.Sprintf("%s (%s) +%9s => ", formattedTime, l.FnInitName, DurationSince(l.PrevTimestamp))
 
 	messages := make([]interface{}, 0)
 	messages = append(messages, toLog)
@@ -152,7 +211,7 @@ func (l *Logger) End() {
 }
 
 func DurationSince(since time.Time) string {
-	ms := time.Now().Sub(since).Milliseconds()
+	ms := time.Since(since).Milliseconds()
 
 	if ms < 1000 {
 		return fmt.Sprintf("%.2fms", float64(ms))
@@ -167,9 +226,93 @@ func DurationSince(since time.Time) string {
 	return fmt.Sprintf("%.2fm", m)
 }
 
+// Clears the terminal screen
+func ClearScreen() {
+	command := "clear"
+
+	if runtime.GOOS == "windows" {
+		command = "cls"
+	}
+
+	sh.Run(command)
+}
+
+// ----------------------------------------------------------------------------
+// FLAGS + GIT
+// ----------------------------------------------------------------------------
+
+func BuildLdFlagValue(packageName, name, value string) string {
+	return fmt.Sprintf("-X %s/%s.%s=%s", MODULE_NAME, packageName, name, value)
+}
+
+func LdFlagString(isDev bool) string {
+	if isDev {
+		return fmt.Sprintf(
+			"-s -w %s %s",
+			BuildLdFlagValue("version", "VersionPrerelease", "dev"),
+			BuildLdFlagValue("version", "BuildDate", time.Now().Format("2006-01-02+15:04:05")),
+		)
+	}
+
+	return fmt.Sprintf(
+		"-s -w %s %s %s",
+		BuildLdFlagValue("version", "GitCommit", GitHash()),
+		BuildLdFlagValue("version", "GitBranch", GitBranch()),
+		BuildLdFlagValue("version", "BuildDate", time.Now().Format("2006-01-02+15:04:05")),
+	)
+}
+
+// Returns the short hash of the current Git commit.
+func GitHash() string {
+	gitHash, _ := sh.Output("git", "rev-parse", "--short", "HEAD")
+	return gitHash
+}
+
+// Returns the current Git branch name.
+//
+// Patches inconsistencies with common CI environments.
+func GitBranch() string {
+	gitBranch, _ := sh.Output("git", "rev-parse", "--abbrev-ref", "HEAD")
+
+	// Detect CircleCI
+	if len(os.Getenv("CIRCLE_BRANCH")) > 0 {
+		gitBranch = os.Getenv("CIRCLE_BRANCH")
+	}
+
+	// Detect GitHub Actions CI
+	if len(os.Getenv("GITHUB_REF_NAME")) > 0 && os.Getenv("GITHUB_REF_TYPE") == "branch" {
+		gitBranch = os.Getenv("GITHUB_REF_NAME")
+	}
+
+	// Detect GitLab CI
+	if len(os.Getenv("CI_COMMIT_BRANCH")) > 0 {
+		gitBranch = os.Getenv("CI_COMMIT_BRANCH")
+	}
+
+	// Detect Netlify CI + generic
+	if len(os.Getenv("BRANCH")) > 0 {
+		gitBranch = os.Getenv("BRANCH")
+	}
+
+	// Detect HEAD state, and remove it.
+	if gitBranch == "HEAD" {
+		gitBranch = ""
+	}
+
+	return gitBranch
+}
+
 // ----------------------------------------------------------------------------
 // MISC
 // ----------------------------------------------------------------------------
+
+// Returns the name of the application binary, based on the current OS.
+func DebugAppName() string {
+	if runtime.GOOS == "windows" {
+		return fmt.Sprintf("%s.exe", APP_NAME)
+	}
+	return APP_NAME
+}
 
 // Checks if an executable exists in PATH
 func ExecExists(e string) bool {
@@ -183,6 +326,20 @@ func GetEnv(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+func CopyFile(src, dst string) error {
+	input, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(dst, input, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Zip one or more files
@@ -224,6 +381,79 @@ func ZipFiles(zipPath string, files ...string) error {
 		_, err = io.Copy(writer, fileToZip)
 		if err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+// Upload all files in a directory to a FTP server
+func FTPUploadDir(host, username, password, remotePath, localPath, releaseVersion string) error {
+	log := NewLogger()
+	defer log.End()
+
+	if host == "" || username == "" || password == "" || remotePath == "" || localPath == "" || releaseVersion == "" {
+		return errors.New("required FTP environment variables not set")
+	}
+
+	config := &ssh.ClientConfig{
+		User: username,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(password),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	conn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%s", host, "22"), config)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client, err := sftp.NewClient(conn)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	err = client.Mkdir(remotePath)
+	if err != nil && !os.IsExist(err) {
+		// If the directory already exists, ignore the error
+		return err
+	}
+
+	localDir, err := os.Open(localPath)
+	if err != nil {
+		return err
+	}
+	defer localDir.Close()
+
+	files, err := localDir.Readdir(-1)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			localFilePath := path.Join(localPath, file.Name())
+			remoteFilePath := path.Join(remotePath, file.Name())
+
+			localFile, err := os.Open(localFilePath)
+			if err != nil {
+				return err
+			}
+			defer localFile.Close()
+
+			remoteFile, err := client.Create(remoteFilePath)
+			if err != nil {
+				return err
+			}
+			defer remoteFile.Close()
+
+			_, err = remoteFile.ReadFrom(localFile)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

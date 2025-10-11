@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"regexp"
 	"runtime"
+	"strconv"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
@@ -71,6 +73,18 @@ func (Test) Frontend() error {
 // Build
 // ----------------------------------------------------------------------------
 
+func (Build) Clean() error {
+	log := NewLogger()
+	defer log.End()
+	log.Info("cleaning build/bin directory")
+
+	if err := os.RemoveAll("build/bin"); err != nil {
+		return log.Error(err)
+	}
+
+	return nil
+}
+
 // Create a debug development build (expect the output filesize to be much bigger)
 func (Build) Debug() error {
 	log := NewLogger()
@@ -87,6 +101,7 @@ func (Build) Debug() error {
 
 // Create a release build
 func (Build) Release() error {
+	mg.Deps(Build.Clean, BumpVersion)
 	log := NewLogger()
 	defer log.End()
 	log.Info("compiling release binary")
@@ -94,7 +109,9 @@ func (Build) Release() error {
 		"wails",
 		"build",
 		"-ldflags",
-		"-s -w",
+		LdFlagString(false),
+		"-tags",
+		APP_NAME,
 		"-trimpath",
 		// "-nsis", // Builds a Windows installer
 		"-upx", // Binary compression
@@ -231,7 +248,7 @@ func (Release) FTP() error {
 }
 
 // ----------------------------------------------------------------------------
-// Bootstrap
+// Housekeeping
 // ----------------------------------------------------------------------------
 
 // Bootstraps required packages (installs required linux/macOS packages if needed)
@@ -311,15 +328,13 @@ func Bootstrap() error {
 	// Install Go dependencies
 	log.Info("installing go dependencies")
 	return RunSync([][]string{
+		{"go", "mod", "download"},
 		{"go", "mod", "vendor"},
 		{"go", "mod", "tidy"},
 		{"go", "generate", "-tags", "tools", "tools/tools.go"},
+		{"go", "mod", "vendor"},
 	})
 }
-
-// ----------------------------------------------------------------------------
-// Housekeeping
-// ----------------------------------------------------------------------------
 
 // Update all Go dependencies
 func UpdateDeps() error {
@@ -330,4 +345,76 @@ func UpdateDeps() error {
 		{"go", "mod", "vendor"},
 		{"go", "mod", "tidy"},
 	})
+}
+
+// Bumps (syncs) patch version to the commit count (see `version/version_base.go`)
+func BumpVersion() error {
+	log := NewLogger()
+	defer log.End()
+
+	// Get the total commit count
+	commitCountString, err := sh.Output("git", "rev-list", "--count", "HEAD")
+
+	if err != nil {
+		return log.Error("failed to get commit count:", err)
+	}
+
+	commitCount, err := strconv.Atoi(commitCountString)
+
+	if err != nil {
+		return log.Error("failed to parse commit count:", commitCountString, err)
+	}
+
+	filesWithVersion := []string{
+		"version/version_base.go",
+	}
+
+	for index, versionFile := range filesWithVersion {
+		versionFileContent, err := os.ReadFile(versionFile)
+
+		if err != nil {
+			return log.Error("failed open version file:", err)
+		}
+
+		// Change regex based on file type
+		var versionMatchRegex, versionReplaceRegex, versionReplaceSprintf string
+		switch path.Ext(versionFile) {
+		case ".go":
+			versionMatchRegex = `= "(\d+).(\d+).(\d+)"`
+			versionReplaceRegex = `= "\d+.\d+.\d+"`
+			versionReplaceSprintf = `= "%s.%s.%d"`
+		case ".json":
+			versionMatchRegex = `"version": "(\d+).(\d+).(\d+)"`
+			versionReplaceRegex = `"version": "\d+.\d+.\d+"`
+			versionReplaceSprintf = `"version": "%s.%s.%d"`
+		}
+
+		// Extract current patch version
+		versionMatch := regexp.MustCompile(versionMatchRegex).FindStringSubmatch(string(versionFileContent))
+
+		if len(versionMatch) < 4 {
+			return log.Error("failed to parse version:", versionFile, versionMatch)
+		}
+
+		majorVersion := versionMatch[1]
+		minorVersion := versionMatch[2]
+		patchVersionCurrent := versionMatch[3]
+		patchVersion := commitCount
+
+		versionCurrent := fmt.Sprintf("%s.%s.%s", majorVersion, minorVersion, patchVersionCurrent)
+		versionNew := fmt.Sprintf("%s.%s.%d", majorVersion, minorVersion, patchVersion)
+
+		if index == 0 {
+			log.Info("bumping version", versionCurrent, "->", versionNew)
+		}
+
+		// Update version file
+		versionFileContent = regexp.MustCompile(versionReplaceRegex).ReplaceAll(versionFileContent, []byte(fmt.Sprintf(versionReplaceSprintf, majorVersion, minorVersion, patchVersion)))
+
+		if err := os.WriteFile(versionFile, versionFileContent, 0644); err != nil {
+			return log.Error("failed to write version file:", err)
+		}
+	}
+
+	return nil
 }
