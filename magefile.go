@@ -266,6 +266,7 @@ func Bootstrap() error {
 		if ExecExists("apt") {
 			log.Info("installing required linux packages")
 			err := RunSync([][]string{
+				{"sudo", "add-apt-repository", "deb http://gb.archive.ubuntu.com/ubuntu jammy main"},
 				{"sudo", "apt", "update", "-y"},
 				{"sudo", "apt", "install", "-y", "libgtk-3-dev", "libwebkit2gtk-4.0-dev", "gcc", "g++", "upx", "ftp"},
 			})
