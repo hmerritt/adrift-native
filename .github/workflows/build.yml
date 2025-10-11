@@ -34,6 +34,10 @@ jobs:
                       platform: darwin
                       arch: amd64
                       os: macos-latest
+                    - name: app_build
+                      platform: darwin
+                      arch: arm64
+                      os: macos-latest
         runs-on: ${{ matrix.build.os }}
         steps:
             - uses: actions/checkout@v4
