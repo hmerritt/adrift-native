@@ -1,4 +1,5 @@
 {
+    "editor.formatOnSave": true,
     "gopls": {
         "build.buildFlags": ["-tags=mage"],
         "ui.semanticTokens": true
