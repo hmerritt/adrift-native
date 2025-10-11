@@ -26,28 +26,25 @@ export const WindowControls: FC<WindowControlsProps> = ({
 		// @TODO Icons - separate icons for mac and windows?
 		<div {...stylex.props(styles.drag, styles.controls)}>
 			{onClose && (
-				<Ripple
-					sx={[styles.controlMac, styles.controlMacClose]}
-					onClick={onClose}
-				>
-					<WindowIcon name="MacClose" sx={styles.controlMacSvg} />
-				</Ripple>
+				<div {...stylex.props(styles.controlMacContainer)} onClick={onClose}>
+					<Ripple sx={[styles.controlMac, styles.controlMacClose]}>
+						<WindowIcon name="MacClose" sx={styles.controlMacSvg} />
+					</Ripple>
+				</div>
 			)}
 			{onMinimize && (
-				<Ripple
-					sx={[styles.controlMac, styles.controlMacMinimize]}
-					onClick={onMinimize}
-				>
-					<WindowIcon name="MacMinimize" sx={styles.controlMacSvg} />
-				</Ripple>
+				<div {...stylex.props(styles.controlMacContainer)} onClick={onMinimize}>
+					<Ripple sx={[styles.controlMac, styles.controlMacMinimize]}>
+						<WindowIcon name="MacMinimize" sx={styles.controlMacSvg} />
+					</Ripple>
+				</div>
 			)}
 			{onMaximize && (
-				<Ripple
-					sx={[styles.controlMac, styles.controlMacMaximize]}
-					onClick={onMaximize}
-				>
-					<WindowIcon name="MacMaximize" sx={styles.controlMacSvg} />
-				</Ripple>
+				<div {...stylex.props(styles.controlMacContainer)} onClick={onMaximize}>
+					<Ripple sx={[styles.controlMac, styles.controlMacMaximize]}>
+						<WindowIcon name="MacMaximize" sx={styles.controlMacSvg} />
+					</Ripple>
+				</div>
 			)}
 		</div>
 	);
@@ -81,10 +78,28 @@ const styles = stylex.create({
 		justifyContent: "center",
 		position: "relative"
 	},
+	controlMacContainer: {
+		position: "relative",
+		cursor: "pointer",
+		"::before": {
+			position: "absolute",
+			content: "",
+			top: -4,
+			bottom: -4,
+			left: -4,
+			right: -4,
+			borderRadius: "100%"
+		},
+		// eslint-disable-next-line @stylexjs/valid-styles
+		"--control-opacity": 0,
+		// eslint-disable-next-line @stylexjs/valid-styles
+		":hover": {
+			"--control-opacity": 1
+		}
+	},
 	controlMac: {
 		alignItems: "center",
 		borderRadius: "100%",
-		cursor: "pointer",
 		display: "flex",
 		height: "1.4rem",
 		justifyContent: "center",
@@ -113,10 +128,7 @@ const styles = stylex.create({
 	},
 	controlMacSvg: {
 		height: "1.1rem",
-		opacity: {
-			default: 0,
-			":hover": 1
-		},
+		opacity: "var(--control-opacity)",
 		transition: "opacity 150ms ease-in-out",
 		width: "1.1rem"
 	}
