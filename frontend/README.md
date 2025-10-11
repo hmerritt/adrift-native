@@ -2,17 +2,17 @@
 
 Template react app with batteries included 🔋
 
--   [Vite](https://vitejs.dev)
--   [Vitest (testing for Vite)](https://vitest.dev/)
--   [Playwright (testing end-to-end)](https://playwright.dev)
--   [Typescript](https://www.typescriptlang.org)
--   [TanStack Store](https://tanstack.com/store/latest)
--   [TanStack Router](https://tanstack.com/router/latest)
--   [Linaria (SASS-in-JS)](https://github.com/callstack/linaria)
--   Custom (hackable) build script
--   Custom utils and helper functions
-    -   Global `log` functions with more functionality than `console.log`
-    -   Global `feature` flag function
+- [Vite](https://vitejs.dev)
+- [Vitest (testing for Vite)](https://vitest.dev/)
+- [Playwright (testing end-to-end)](https://playwright.dev)
+- [Typescript](https://www.typescriptlang.org)
+- [TanStack Store](https://tanstack.com/store/latest)
+- [TanStack Router](https://tanstack.com/router/latest)
+- [StyleX](https://stylexjs.com/)
+- Custom (hackable) build script
+- Custom utils and helper functions
+    - Global `log` functions with more functionality than `console.log`
+    - Global `feature` flag function
 
 > Checkout [Adrift Native](https://github.com/hmerritt/adrift-native) to run Adrift apps natively on Windows, Mac, and Linux.
 
@@ -28,17 +28,17 @@ Clone this repo and run one of the following scripts:
 
 Available scripts (run using `yarn <script>` or `npm run <script>`):
 
--   `dev` - starts Vite dev server for local development
--   `test` - runs all test files
--   `preview` - similar to `dev`, but uses production mode to simulate the final build
--   `build` - builds the project to `dist` directory
+- `dev` - starts Vite dev server for local development
+- `test` - runs all test files
+- `preview` - similar to `dev`, but uses production mode to simulate the final build
+- `build` - builds the project to `dist` directory
 
 ## Features
 
--   [Custom functions](#custom-functions)
-    -   [Logs](#log-and-debug-functions)
-    -   [Feature flag](#feature-flag-function)
--   [Styles](#styling-sass-in-js-via-linaria)
+- [Custom functions](#custom-functions)
+    - [Logs](#log-and-debug-functions)
+    - [Feature flag](#feature-flag-function)
+- [Styles](#styling-stylex)
 
 ### Custom functions
 
@@ -53,7 +53,7 @@ Anywhere in the code you can call `log()`, or `debug()` (no imports needed).
 log("hello, world!");
 
 // This will log with `console.error`
-log("error", "websocket error");
+log.error("websocket error");
 ```
 
 You can also call `logn()`, and `debugn()`. This namespaces each log so you can keep track of multiple things at once.
@@ -61,6 +61,9 @@ You can also call `logn()`, and `debugn()`. This namespaces each log so you can 
 ```js
 //    Namespace  Log message
 logn("socket", "Initiated websocket connection");
+
+// This will log with `console.error`
+logn.error("socket", "websocket error");
 ```
 
 > [timestamp] +[time since last log in ms] [namespace] [log message]
@@ -79,30 +82,11 @@ if (feature("myAwesomeFlag")) {
 }
 ```
 
-### Styling (SASS-in-JS via Linaria)
+### Styling (StyleX)
 
-Adrift uses Linaria, a **Zero runtime** CSS in JS library.
+Adrift uses StyleX, a **Zero runtime** CSS in JS library.
 
-A custom config is used to enable the use of **SASS-in-JS**.
-
-SASS allows for theming to be imported and used directly within the Linaria styles.
-
-```js
-const card = css`
-	${theme} // Import theme object - can now use all SCSS variables and mixins set in styles/theme.ts
-	color: $red-500; // See styles/colors.tsx
-	box-shadow: $shadow-1; // See styles/shadows.tsx
-
-	// All valid SCSS syntax is valid here (this is just an example)
-	@for $i from 1 through 20 {
-		.stack.stack-#{$i} {
-			& > * {
-				margin-top: #{$i}rem;
-			}
-		}
-	}
-`;
-```
+StyleX builds optimized styles using collision-free atomic CSS which is superior to what could be authored and maintained by hand.
 
 > Other popular libraries such as `styled-components` can negatively impact app performance due to their use of a runtime.
 >

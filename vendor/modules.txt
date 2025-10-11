@@ -128,7 +128,7 @@ github.com/fatih/color
 # github.com/flytam/filenamify v1.2.0
 ## explicit; go 1.13
 github.com/flytam/filenamify
-# github.com/fsnotify/fsnotify v1.8.0
+# github.com/fsnotify/fsnotify v1.9.0
 ## explicit; go 1.17
 github.com/fsnotify/fsnotify
 github.com/fsnotify/fsnotify/internal
@@ -216,6 +216,9 @@ github.com/gookit/color
 # github.com/gorilla/css v1.0.1
 ## explicit; go 1.20
 github.com/gorilla/css/scanner
+# github.com/gorilla/websocket v1.5.3
+## explicit; go 1.12
+github.com/gorilla/websocket
 # github.com/jackmordaunt/icns v1.0.0
 ## explicit
 github.com/jackmordaunt/icns
@@ -408,7 +411,7 @@ github.com/wailsapp/mimetype
 github.com/wailsapp/mimetype/internal/charset
 github.com/wailsapp/mimetype/internal/json
 github.com/wailsapp/mimetype/internal/magic
-# github.com/wailsapp/wails/v2 v2.10.1
+# github.com/wailsapp/wails/v2 v2.10.2
 ## explicit; go 1.22.0
 github.com/wailsapp/wails/v2
 github.com/wailsapp/wails/v2/cmd/wails
@@ -542,7 +545,6 @@ golang.org/x/net/idna
 golang.org/x/net/internal/httpcommon
 golang.org/x/net/internal/socks
 golang.org/x/net/proxy
-golang.org/x/net/websocket
 # golang.org/x/sync v0.12.0
 ## explicit; go 1.23.0
 golang.org/x/sync/errgroup

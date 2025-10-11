@@ -1,3 +1,12 @@
+import { type StyleXStyles } from "@stylexjs/stylex";
+
+/**
+ * StyleX custom `sx` prop to allow passing of stylex styles to React components
+ */
+export type SxProp = {
+	sx?: StyleXStyles;
+};
+
 /**
  * Deep `keyof` of a nested object. INCLUDES root key as well as all nested.
  *

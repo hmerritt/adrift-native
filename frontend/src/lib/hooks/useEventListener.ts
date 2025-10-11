@@ -9,9 +9,7 @@ export function useEventListener<
 	T extends HTMLElement | void = void
 >(
 	eventName: KW | KH,
-	handler: (
-		event: WindowEventMap[KW] | HTMLElementEventMap[KH] | Event
-	) => void,
+	handler: (event: WindowEventMap[KW] | HTMLElementEventMap[KH] | Event) => void,
 	element?: RefObject<T>
 ) {
 	// Create a ref that stores handler
@@ -29,8 +27,7 @@ export function useEventListener<
 		}
 
 		// Create event listener that calls handler function stored in ref
-		const eventListener: typeof handler = (event) =>
-			savedHandler.current(event);
+		const eventListener: typeof handler = (event) => savedHandler.current(event);
 
 		targetElement.addEventListener(eventName, eventListener);
 

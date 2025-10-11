@@ -1,9 +1,9 @@
-import { css } from "@linaria/core";
+import * as stylex from "@stylexjs/stylex";
 import { createFileRoute } from "@tanstack/react-router";
 
-import theme from "lib/styles";
+import { shadowFn } from "lib/styles/shadows.stylex";
 
-import { DotGrid, FrostedGlass, Fullscreen, Stack, Waves } from "view/components";
+import { FrostedGlass, Shader } from "view/components";
 
 export const Route = createFileRoute("/")({
 	component: IndexRoute
@@ -11,61 +11,76 @@ export const Route = createFileRoute("/")({
 
 export function IndexRoute() {
 	return (
-		<>
-			<Stack spacing={15}>
-				<Fullscreen
-					center
-					zIndex={1}
-					position="relative"
-					padding="1rem 2rem"
-					style={{ height: "70vh" }}
-				>
-					<FrostedGlass>
-						<div className={pictureFrame}>
-							<h1 className={header}>Adrift</h1>
-							<FrostedGlass>
-								<h4>Template react app with batteries included 🔋</h4>
-							</FrostedGlass>
-							<Waves />
-						</div>
-					</FrostedGlass>
-				</Fullscreen>
-			</Stack>
+		<div {...stylex.props(styles.container)}>
+			<h1 {...stylex.props(styles.header, shadowFn.textBlock("#070707"))}>
+				Adrift
+			</h1>
+			<FrostedGlass>
+				<h4 {...stylex.props(styles.subtitle)}>
+					Template react app with batteries included 🔋
+				</h4>
+			</FrostedGlass>
+			<Shader
+				sx={styles.shader}
+				source={{
+					rawGLSL: `void mainImage(out vec4 fragColor, vec2 fragCoord) {
+						float mr = min(iResolution.x, iResolution.y);
+						vec2 uv = (fragCoord * 2.0 - iResolution.xy) / mr;
 
-			<DotGrid position="fixed" refForMousePosition="window" spacing={25} />
-		</>
+						float d = -iTime * 0.8;
+						float a = 0.0;
+						for (float i = 0.0; i < 8.0; ++i) {
+							a += cos(i - d - a * uv.x);
+							d += sin(uv.y * i + a);
+						}
+						d += iTime * 0.5;
+
+						vec3 colorA = vec3(0.0, 0.4, 1); // Blue
+						vec3 colorB = vec3(.03, .03, .03); // Black
+						float t = cos(a) * 0.5 + 0.5;
+						vec3 col = mix(colorA, colorB, t);
+
+						fragColor = vec4(col, 1);
+					}`
+				}}
+			/>
+		</div>
 	);
 }
 
-// This will get compiled at build time into a css file.
-// Why? - Performance is *greatly* improved over something like styled-components which compiles at run time!
-const pictureFrame = css`
-	${theme} // Import theme object - can now use all SCSS variables and mixins set in styles/theme.ts
-	position: relative;
-	width: 700px;
-	height: 350px;
-	margin: auto;
-	display: flex;
-	overflow: hidden;
-	align-items: center;
-	flex-direction: column;
-	justify-content: center;
-	box-shadow: shadowBlock($blue-400);
-
-	h4 {
-		font-style: italic;
-		padding: 1rem;
-		opacity: 0.8;
-		font-size: 1.5rem;
+const styles = stylex.create({
+	container: {
+		display: "flex",
+		position: "fixed",
+		top: 0,
+		left: 0,
+		width: "100%",
+		height: "100%",
+		alignItems: "center",
+		justifyContent: "center",
+		flexDirection: "column",
+		backgroundColor: "#000"
+	},
+	header: {
+		color: "#fff",
+		fontSize: "10rem",
+		fontStyle: "italic",
+		fontWeight: "bold",
+		textTransform: "lowercase"
+	},
+	subtitle: {
+		color: "#fff",
+		fontSize: "1.5rem",
+		fontStyle: "italic",
+		opacity: 0.8,
+		padding: "1rem"
+	},
+	shader: {
+		position: "absolute",
+		top: 0,
+		left: 0,
+		width: "100%",
+		height: "100%",
+		zIndex: -1
 	}
-`;
-
-const header = css`
-	${theme}
-	text-transform: lowercase;
-	font-style: italic;
-	font-size: 10rem;
-	font-weight: thin;
-	color: $blue-100;
-	text-shadow: shadowBlock($blue-400);
-`;
+});

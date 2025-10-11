@@ -1,0 +1,13 @@
+{
+	"//": "https://reactcosmos.org/docs/fixtures/fixture-inputs",
+	"exportPath": "dist-cosmos",
+	"fixtureFileSuffix": "story",
+	"fixturesDir": "__stories__",
+	"globalImports": ["./src/lib/styles/stylex.css", "./src/lib/global/index.ts"],
+	"plugins": [
+		"react-cosmos-plugin-vite",
+		"react-cosmos-plugin-open-fixture",
+		"react-cosmos-plugin-boolean-input"
+	],
+	"watchDirs": ["src"]
+}

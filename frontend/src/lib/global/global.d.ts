@@ -1,11 +1,7 @@
 import type { EnvKeys, EnvObj } from "./env";
-import type { FeatureFlags, FeatureOptions } from "./featureFlags";
-import type { LogStoreType } from "./log";
-import type { SafeAwaitFn } from "./utils";
-
-type LogFn = (logLevel: any, ...args: any[]) => void;
-type LognFn = (namespace: string, logLevel: any, ...args: any[]) => void;
-type FeatureFn = (mode: FeatureFlags, options?: FeatureOptions) => boolean;
+import type { FeatureFn } from "./featureFlags";
+import type { LogFn, LogStoreType, LognFn } from "./log";
+import type { GoFn, GoSyncFn } from "./utils";
 
 declare global {
 	var log: LogFn;
@@ -14,7 +10,8 @@ declare global {
 	var debugn: LognFn;
 	var logStore: LogStoreType;
 	var env: EnvObj;
-	var safeAwait: SafeAwaitFn;
+	var go: GoFn;
+	var goSync: GoSyncFn;
 	var envGet: (key: EnvKeys) => any;
 	var feature: FeatureFn;
 	var getNumberOfEventListeners: () => number;
@@ -27,7 +24,8 @@ declare global {
 		debugn: LognFn;
 		logStore: LogStoreType;
 		env: EnvObj;
-		safeAwait: SafeAwaitFn;
+		go: GoFn;
+		goSync: GoSyncFn;
 		envGet: (key: EnvKeys) => any;
 		feature: FeatureFn;
 		getNumberOfEventListeners: () => number;

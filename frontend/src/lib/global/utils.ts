@@ -10,23 +10,23 @@ export const getGlobal = () => {
 		if (typeof window !== "undefined") return window;
 		if (typeof globalThis !== "undefined") return globalThis;
 		return global;
-	} catch (e) {
+	} catch (_) {
 		return global;
 	}
 };
 
+export const $global = getGlobal();
+
 /**
  * Set immutable global variable.
  */
-export const setGlobalValue = (key: string, value: any) => {
+export const setGlobalValue = (key: string, value: any, configurable = false) => {
 	Object.defineProperty(getGlobal(), key, {
 		value: value,
-		configurable: false,
-		writable: false
+		configurable: configurable,
+		writable: configurable
 	});
 };
-
-export const $global = getGlobal();
 
 /**
  * Parse string environment variable into a primitive.
@@ -42,30 +42,47 @@ export const parseEnv = (value: any, isJson = false) => {
 		try {
 			return JSON.parse(value ?? "");
 		} catch (e) {
-			logn("parseEnv", "error", "JSON value failed to parse", value, e);
+			logn.error("parseEnv", value, e);
 		}
 	}
 	return value;
 };
 
 /**
- * Safely run async task, catching and returning any errors as a variable (similar to Go).
+ * Run async task, catching and returning any errors as a variable (similar to Go).
  *
- * @example const [error, result] = await run(myPromise())
+ * @example const [result, error] = await go(myPromise())
  */
-export const safeAwait = async <T, E = Error>(
-	promise: Promise<T> | T
-): Promise<[T, null] | [null, E]> => {
+export const go = async <T, E = Error>(
+	promise: Promise<T> | (() => Promise<T>)
+): Promise<[T, null] | [T, E]> => {
 	try {
+		if (typeof promise === "function") promise = promise();
 		const result = await promise;
 		return [result, null];
 	} catch (error) {
-		return [null, error as E];
+		return [null as T, error as E];
 	}
 };
 
-export type SafeAwaitFn = typeof safeAwait;
+/**
+ * Run synchronous task, catching and returning any errors as a variable (similar to Go).
+ *
+ * @example const [result, error] = goSync(() => myFn(...props))
+ */
+export const goSync = <R, E = Error>(cb: () => R): [R, null] | [R, E] => {
+	try {
+		const result = cb();
+		return [result, null];
+	} catch (error) {
+		return [null as R, error as E];
+	}
+};
 
-export const injectSafeAwait = () => {
-	setGlobalValue("safeAwait", safeAwait);
+export type GoFn = typeof go;
+export type GoSyncFn = typeof goSync;
+
+export const injectGo = () => {
+	setGlobalValue("go", go);
+	setGlobalValue("goSync", goSync);
 };

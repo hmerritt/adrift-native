@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -18,6 +19,7 @@ bootstrap();
 // Run anything you like, here we get the app version from the package.json + the current commit hash.
 // prettier-ignore
 async function bootstrap() {
+	const isDev = core.isDev(args);
 	const gitCommitHash = await core.run(`git rev-parse HEAD`, pathRoot, '');
 	const gitCommitHashShort = core.shorten(gitCommitHash) || '';
 	const gitBranch = await core.getGitBranch(pathRoot);
@@ -25,7 +27,7 @@ async function bootstrap() {
 	const appName = packageJSON?.name;
 
 	// Checks GitHub for any adrift updates.
-	const checkForAdriftUpdate = true;
+	const checkForAdriftUpdate = isDev;
 
 	// When true, the env array below can be overridden by whatever is in the environment at runtime.
 	const allowEnvOverride = true;
@@ -33,12 +35,14 @@ async function bootstrap() {
 	// Set ENV array to inject, key/value
 	const env: Env = [
 		["NODE_ENV", core.getNodeEnv(args)],
-		["GENERATE_SOURCEMAP", core.getNodeEnv(args) === "development"],
+		["GENERATE_SOURCEMAP", isDev],
 		["VITE_ADRIFT_VERSION", adriftVersion],
 		["VITE_NAME", appName],
 		["VITE_VERSION", appVersion],
 		["VITE_GIT_BRANCH", gitBranch],
-		["VITE_GIT_COMMIT", gitCommitHashShort]
+		["VITE_GIT_COMMIT", gitCommitHashShort],
+		["VITE_APP_HOST", "http://localhost:5173"],
+		["VITE_SHOW_DEVTOOLS", true]
 		// ['VITE_PLAUSIBLE_ENABLE', true],
 		// ['VITE_PLAUSIBLE_DOMAIN', 'PLAUSIBLE_DOMAIN'],
 		// ['VITE_PLAUSIBLE_API_HOST', 'https://plausible.io']

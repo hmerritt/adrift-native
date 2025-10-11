@@ -1,5 +1,5 @@
-import { type EnvKeys, env, envGet } from "./env";
-import { setGlobalValue } from "./utils";
+import { type EnvKeys, envGet } from "./env";
+import { parseEnv, setGlobalValue } from "./utils";
 
 /**
  * Returns `true` if the feature is enabled in `env` object.
@@ -12,13 +12,17 @@ export const feature = (mode: FeatureFlags, options: FeatureOptions = {}): boole
 		...options
 	};
 
-	// Bypass feature flag in dev mode if `alwaysShowOnDev` is true
-	if (alwaysShowOnDev && (env.isDevelopment || env.isTesting)) {
+	// Bypass feature flag in dev mode if `alwaysShowOnDev` is true (unless explicitly set to false)
+	if (
+		alwaysShowOnDev &&
+		(envGet("isDev") || envGet("isTest")) &&
+		parseEnv(envGet(mode)) !== false
+	) {
 		return true;
 	}
 
 	// Feature is truthy in featureFlags{}
-	if (envGet(mode) && !isFalse(envGet(mode))) {
+	if (envGet(mode) && parseEnv(envGet(mode))) {
 		return true;
 	}
 
@@ -30,18 +34,8 @@ export type FeatureOptions = {
 };
 
 export type FeatureFlags = EnvKeys;
+export type FeatureFn = typeof feature;
 
 export const injectFeature = () => {
 	setGlobalValue("feature", feature);
-};
-
-const isFalse = (value: unknown): value is false => {
-	return (
-		!value ||
-		value === "0" ||
-		value === "off" ||
-		value === "null" ||
-		value === "false" ||
-		value === "undefined"
-	);
 };

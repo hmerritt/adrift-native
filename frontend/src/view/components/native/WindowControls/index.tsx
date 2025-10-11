@@ -1,9 +1,9 @@
-import { css, cx } from "@linaria/core";
+import * as stylex from "@stylexjs/stylex";
 import { FC } from "react";
 
 import { Ripple } from "view/components/experimental";
 
-import { MacClose, MacMaximize, MacMinimize } from "./icons";
+import { WindowIcon } from "./icons";
 
 export type WindowControlsProps = {
 	type?: "default" | "mac";
@@ -18,85 +18,89 @@ export type WindowControlsProps = {
  * Used for frameless windows.
  */
 export const WindowControls: FC<WindowControlsProps> = ({
-	type,
 	onClose,
 	onMinimize,
 	onMaximize
 }) => {
 	return (
 		// @TODO Icons - separate icons for mac and windows?
-		<div className={controls}>
+		<div {...stylex.props(styles.controls)}>
 			{onClose && (
-				<Ripple className={cx(controlMac, controlMacClose)} onClick={onClose}>
-					<MacClose />
+				<Ripple
+					sx={[styles.controlMac, styles.controlMacClose]}
+					onClick={onClose}
+				>
+					<WindowIcon name="MacClose" sx={styles.controlMacSvg} />
 				</Ripple>
 			)}
 			{onMinimize && (
 				<Ripple
-					className={cx(controlMac, controlMacMinimize)}
+					sx={[styles.controlMac, styles.controlMacMinimize]}
 					onClick={onMinimize}
 				>
-					<MacMinimize />
+					<WindowIcon name="MacMinimize" sx={styles.controlMacSvg} />
 				</Ripple>
 			)}
 			{onMaximize && (
 				<Ripple
-					className={cx(controlMac, controlMacMaximize)}
+					sx={[styles.controlMac, styles.controlMacMaximize]}
 					onClick={onMaximize}
 				>
-					<MacMaximize />
+					<WindowIcon name="MacMaximize" sx={styles.controlMacSvg} />
 				</Ripple>
 			)}
 		</div>
 	);
 };
 
-const controls = css`
-	position: relative;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: center;
-	gap: 1rem;
-	--runtime-draggable: drag;
-`;
-
-const controlMac = css`
-	cursor: pointer;
-	width: 1.4rem;
-	height: 1.4rem;
-	border-radius: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-
-	svg {
-		opacity: 0;
-		width: 1.1rem;
-		height: 1.1rem;
-		transition: opacity 150ms ease-in-out;
+const styles = stylex.create({
+	controlMac: {
+		alignItems: "center",
+		borderRadius: "100%",
+		cursor: "pointer",
+		display: "flex",
+		height: "1.4rem",
+		justifyContent: "center",
+		width: "1.4rem"
+	},
+	controlMacClose: {
+		backgroundColor: "#fc5753",
+		borderColor: "#df4744",
+		borderStyle: "solid",
+		borderWidth: "0.1rem"
+	},
+	controlMacMaximize: {
+		backgroundColor: "#33c748",
+		borderColor: "#27aa35",
+		// This button is sometimes gray ??!!
+		// backgroundColor: "#ded8dc",
+		// border: "0.1rem solid #cac4c8"
+		borderStyle: "solid",
+		borderWidth: "0.1rem"
+	},
+	controlMacMinimize: {
+		backgroundColor: "#fdbc40",
+		borderColor: "#de9f34",
+		borderStyle: "solid",
+		borderWidth: "0.1rem"
+	},
+	controlMacSvg: {
+		height: "1.1rem",
+		opacity: {
+			default: 0,
+			":hover": 1
+		},
+		transition: "opacity 150ms ease-in-out",
+		width: "1.1rem"
+	},
+	controls: {
+		// eslint-disable-next-line @stylexjs/valid-styles
+		"--runtime-draggable": "drag",
+		alignItems: "center",
+		display: "flex",
+		flexDirection: "row",
+		gap: "1rem",
+		justifyContent: "center",
+		position: "relative"
 	}
-
-	&:hover svg {
-		opacity: 1;
-	}
-`;
-
-const controlMacClose = css`
-	background-color: #fc5753;
-	border: 0.1rem solid #df4744;
-`;
-
-const controlMacMinimize = css`
-	background-color: #fdbc40;
-	border: 0.1rem solid #de9f34;
-`;
-
-const controlMacMaximize = css`
-	background-color: #33c748;
-	border: 0.1rem solid #27aa35;
-
-	// This button is sometimes gray ??!!
-	/* background-color: #ded8dc;
-	border: 0.1rem solid #cac4c8; */
-`;
+});

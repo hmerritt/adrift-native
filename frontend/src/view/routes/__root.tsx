@@ -1,4 +1,4 @@
-import { css } from "@linaria/core";
+import * as stylex from "@stylexjs/stylex";
 import {
 	Outlet,
 	createRootRouteWithContext,
@@ -6,17 +6,11 @@ import {
 } from "@tanstack/react-router";
 import { lazy } from "react";
 
-import { DotGrid, Icon } from "view/components";
-import { WindowControls } from "view/components/native";
+import { colors } from "lib/styles/colors.stylex";
+import { shadowFn } from "lib/styles/shadows.stylex";
 
-const TanStackRouterDevtools =
-	env.isDevelopment && env.showDevTools
-		? lazy(() =>
-				import("@tanstack/router-devtools").then((res) => ({
-					default: res.TanStackRouterDevtools
-				}))
-			)
-		: () => null;
+import { DotGrid, FrostedGlass, Icon, Stack } from "view/components";
+import { WindowControls } from "view/components/native";
 
 /**
  * `@tanstack/react-router` file-based routing.
@@ -30,7 +24,7 @@ export const Route = createRootRouteWithContext()({
 
 function RootRoute() {
 	return (
-		<div>
+		<>
 			{/* Show a global spinner when the router is transitioning */}
 			<RouterSpinner />
 			{/* Render our first route match */}
@@ -38,37 +32,72 @@ function RootRoute() {
 			{/* Router dev tools */}
 			<TanStackRouterDevtools />
 
-			<div className={controlsWrapper}>
+			<div {...stylex.props(styles.controlsWrapper)}>
 				<WindowControls
 					onClose={() => (window as any)?.runtime?.Quit()}
 					onMinimize={() => (window as any)?.runtime?.WindowMinimise()}
 					onMaximize={() => (window as any)?.runtime?.WindowToggleMaximise()}
 				/>
 			</div>
-		</div>
+		</>
 	);
-}
-
-function RouterSpinner() {
-	const isLoading = useRouterState({ select: (s) => s.status === "pending" });
-	return isLoading ? <Icon name="Spinner" /> : null;
 }
 
 export function NotFoundRoute() {
 	return (
-		<div className="flex-center" style={{ height: "100vh" }}>
-			<h2 style={{ fontSize: "2rem", textAlign: "center", zIndex: 10 }}>
-				404, Page not found :(
-			</h2>
-			<DotGrid position="fixed" refForMousePosition="window" spacing={50} />
-		</div>
+		<>
+			<Stack center sx={styles.fullScreen}>
+				<FrostedGlass sx={[styles.titleGlass, shadowFn.boxBlock(colors.primary)]}>
+					<h2 {...stylex.props(styles.title)}>404, Page not found :(</h2>
+				</FrostedGlass>
+			</Stack>
+			<DotGrid
+				position="fixed"
+				refForMousePosition="window"
+				reactToWindowResize
+				spacing={40}
+				damping={0.5}
+				returnSpeed={0.18}
+				attractionBase={1.025}
+				maxAttraction={0.8}
+			/>
+		</>
 	);
 }
 
-const controlsWrapper = css`
-	position: fixed;
-	top: 0;
-	right: 0;
-	z-index: 9999;
-	padding: 1.5rem;
-`;
+const TanStackRouterDevtools = feature("showDevTools", { alwaysShowOnDev: false })
+	? lazy(() =>
+			import("@tanstack/react-router-devtools").then((res) => ({
+				default: res.TanStackRouterDevtools
+			}))
+		)
+	: () => null;
+
+function RouterSpinner() {
+	const isLoading = useRouterState({ select: (s) => s.isLoading });
+	return isLoading ? <Icon name="Spinner" /> : null;
+}
+
+const styles = stylex.create({
+	fullScreen: {
+		alignItems: "center",
+		display: "flex",
+		height: "100vh",
+		justifyContent: "center"
+	},
+	title: {
+		fontSize: "2rem",
+		textAlign: "center",
+		zIndex: 10
+	},
+	titleGlass: {
+		padding: "2.5rem"
+	},
+	controlsWrapper: {
+		position: "fixed",
+		top: 0,
+		left: 0,
+		zIndex: 9999,
+		padding: "1.5rem"
+	}
+});

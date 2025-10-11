@@ -6,7 +6,7 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/magefile/mage v1.15.0
 	github.com/pkg/sftp v1.13.8
-	github.com/wailsapp/wails/v2 v2.10.1
+	github.com/wailsapp/wails/v2 v2.10.2
 	golang.org/x/crypto v0.36.0
 	gotest.tools/gotestsum v1.11.0
 )
@@ -36,7 +36,7 @@ require (
 	github.com/dnephin/pflag v1.0.7 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/flytam/filenamify v1.2.0 // indirect
-	github.com/fsnotify/fsnotify v1.8.0 // indirect
+	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.6.2 // indirect
 	github.com/go-git/go-git/v5 v5.13.2 // indirect
@@ -47,6 +47,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gookit/color v1.5.4 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/jackmordaunt/icns v1.0.0 // indirect
 	github.com/jaypipes/ghw v0.13.0 // indirect
 	github.com/jaypipes/pcidb v1.0.1 // indirect

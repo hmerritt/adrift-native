@@ -1,20 +1,21 @@
-import { useState } from "react";
 import {
 	DndContext,
-	DragOverlay,
 	DragEndEvent,
+	DragOverlay,
+	MouseSensor,
+	MouseSensorOptions,
+	PointerSensorOptions,
+	TouchSensor,
 	UniqueIdentifier,
 	closestCenter,
-	MouseSensor,
-	TouchSensor,
-	useSensors,
 	useSensor,
-	MouseSensorOptions,
-	PointerSensorOptions
+	useSensors
 } from "@dnd-kit/core";
-import { arrayMove, SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
+import { SortableContext, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
+import { useState } from "react";
 
 import { Grid, GridProps } from "view/components";
+
 import { GridDndItem } from "./GridDndItem";
 
 type Data = {
@@ -31,7 +32,7 @@ export type GridDndrops = GridProps & {
 	data: Data[];
 	mouseSensorOptions?: MouseSensorOptions;
 	pointerSensorOptions?: PointerSensorOptions;
-	renderWith: (props: RenderWithProps) => JSX.Element;
+	renderWith: (props: RenderWithProps) => React.JSX.Element;
 	getProps?: (data: Data, index?: number) => Record<string, unknown>;
 	setData: React.Dispatch<React.SetStateAction<any[]>>;
 	// Custom drag events

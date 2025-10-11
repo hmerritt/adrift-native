@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 /**
  * Produce the next state by mutating the (current) state object.
  *
@@ -48,9 +50,9 @@ export const mutate = <TState>(
  * }, [mutateLogger], "count increment");
  */
 export const mutateLogger = (prevState: any, nextState: any, mutateTitle = "(state)") => {
-	if (!env.isDevelopment) return;
-	logn("state", "groupCollapsed", `${mutateTitle}`);
+	if (!env.isDev) return;
+	logn.groupCollapsed("state", `${mutateTitle}`);
 	console.log("prev", prevState);
 	console.log("next", nextState);
-	logn("state", "groupEnd");
+	logn.groupEnd("state");
 };

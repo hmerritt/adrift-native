@@ -16,6 +16,32 @@ export const arraySpread = <TItem>(
 	return [] as TItem[];
 };
 
+/**
+ * Gets the property value at path of object.
+ *
+ * If the resolved value is undefinedthe defaultValue is used in its place.
+ */
+export const get = <T = any>(
+	object: Record<string, any> | null | undefined,
+	path: string | string[],
+	defaultValue?: T
+): T | undefined => {
+	// Coerce path to an array if it's a string.
+	const pathArray = Array.isArray(path) ? path : path.split(".");
+
+	// Reduce the path array to the final value.
+	let result: any = object;
+	for (const key of pathArray) {
+		// If at any point the object/value is null or undefined, the path is invalid.
+		if (result === null || result === undefined) {
+			return defaultValue;
+		}
+		result = result[key];
+	}
+
+	return result === undefined ? defaultValue : result;
+};
+
 export const hasProp = <K extends PropertyKey>(
 	data: object,
 	prop: K
@@ -24,7 +50,7 @@ export const hasProp = <K extends PropertyKey>(
 };
 
 export const isObj = (v: unknown): v is Record<string, unknown> => {
-	return !!v && typeof v === "object";
+	return !!v && typeof v === "object" && !Array.isArray(v);
 };
 
 /**

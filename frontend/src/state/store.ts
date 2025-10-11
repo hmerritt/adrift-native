@@ -1,4 +1,4 @@
-import { Store } from "@tanstack/react-store";
+import { Store } from "@tanstack/store";
 
 import { mutate, mutateLogger } from "./mutate";
 import { colorStore } from "./slices/color/colorStore";

@@ -29,7 +29,8 @@ export const createTestRouter = (element: any) => {
 
 	const router = createRouter({
 		routeTree: rootRoute.addChildren([componentRoute]),
-		history: createHashHistory()
+		history: createHashHistory(),
+		defaultPendingMinMs: 0
 	});
 
 	return router;
@@ -65,4 +66,12 @@ export const selectTestId = (
 export const getStyle = (el: Element | null): CSSStyleDeclaration => {
 	if (!el) return {} as CSSStyleDeclaration;
 	return window.getComputedStyle(el);
+};
+
+/**
+ * Standardize style string.
+ */
+export const cleanStyle = (s: string) => {
+	s = s.replace(/\s+/g, " ").trim();
+	return s;
 };

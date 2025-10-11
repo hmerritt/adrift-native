@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import execBase from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -136,7 +137,7 @@ export async function run(
 	fallback = undefined as any
 ) {
 	try {
-		const { stdout, stderr } = await execAwait(command, { cwd: path });
+		const { stdout } = await execAwait(command, { cwd: path });
 		return stdout?.trim();
 	} catch (e) {
 		if (fallback === undefined) {
@@ -171,7 +172,11 @@ export function isProd(args = [] as string[]) {
 }
 
 export function isTest(args = [] as string[]) {
-	return args.length >= 1 && args[0] === "vitest";
+	return args.length >= 1 && (args[0] === "vitest" || args[0] === "cosmos");
+}
+
+export function isDev(args = [] as string[]) {
+	return !isProd(args) && !isTest(args);
 }
 
 /**

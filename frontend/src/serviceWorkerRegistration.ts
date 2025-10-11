@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // @ts-nocheck
 // This optional code is used to register a service worker.
 // register() is not called by default.
@@ -24,10 +25,7 @@ const isLocalhost = Boolean(
 export function register(config) {
 	if (import.meta.env.MODE === "production" && "serviceWorker" in navigator) {
 		// The URL constructor is available in all browsers that support SW.
-		const publicUrl = new URL(
-			import.meta.env.BASE_URL,
-			window.location.href
-		);
+		const publicUrl = new URL(import.meta.env.BASE_URL, window.location.href);
 		if (publicUrl.origin !== window.location.origin) {
 			// Our service worker won't work if PUBLIC_URL is on a different origin
 			// from what our page is served on. This might happen if a CDN is used to
@@ -112,8 +110,7 @@ function checkValidServiceWorker(swUrl, config) {
 			const contentType = response.headers.get("content-type");
 			if (
 				response.status === 404 ||
-				(contentType != null &&
-					contentType.indexOf("javascript") === -1)
+				(contentType != null && contentType.indexOf("javascript") === -1)
 			) {
 				// No service worker found. Probably a different app. Reload the page.
 				navigator.serviceWorker.ready.then((registration) => {
@@ -127,9 +124,7 @@ function checkValidServiceWorker(swUrl, config) {
 			}
 		})
 		.catch(() => {
-			console.log(
-				"No internet connection found. App is running in offline mode."
-			);
+			console.log("No internet connection found. App is running in offline mode.");
 		});
 }
 

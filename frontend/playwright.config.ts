@@ -1,26 +1,34 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const isCI = !!process.env.CI;
+
+const port = process.env.PORT || "4173";
+const host = process.env.HOST || "localhost";
+const baseURL = `http://${host}:${port}`;
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
 	testDir: "./tests-e2e",
-	/* Run tests in files in parallel */
 	fullyParallel: true,
-	/* Fail the build on CI if you accidentally left test.only in the source code. */
-	forbidOnly: !!process.env.CI,
-	/* Retry on CI only */
-	retries: process.env.CI ? 2 : 0,
+	forbidOnly: !!isCI,
+	retries: isCI ? 2 : 0,
+
+	expect: {
+		timeout: 10_000
+	},
+
 	/* Opt out of parallel tests on CI. */
-	workers: process.env.CI ? 1 : undefined,
+	workers: isCI ? 1 : undefined,
+
 	/* Reporter to use. See https://playwright.dev/docs/test-reporters */
-	reporter: "html",
+	/* html | list */
+	reporter: [["list"], ["html", { open: "never" }]],
+
 	/* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
 	use: {
-		/* Base URL to use in actions like `await page.goto('/')`. */
-		baseURL: "http://localhost:5173",
-
-		/* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+		baseURL: baseURL,
 		trace: "on-first-retry"
 	},
 
@@ -40,8 +48,8 @@ export default defineConfig({
 
 	/* Run your local dev server before starting the tests */
 	webServer: {
-		command: "yarn dev",
-		url: "http://localhost:5173",
-		reuseExistingServer: !process.env.CI
+		command: `yarn preview`,
+		url: baseURL,
+		reuseExistingServer: !isCI
 	}
 });

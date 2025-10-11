@@ -1,11 +1,12 @@
-import { Ref, SVGProps } from "react";
+import { Ref } from "react";
 
 import * as Icons from "./subComponents";
+import { IconSvgProps } from "./subComponents/props";
 
 // Infer the type of IconMappings, then extract the keys from the type it infers
 export type IconsAvailable = keyof typeof Icons;
 
-type IconProps = SVGProps<SVGSVGElement> & {
+type IconProps = IconSvgProps & {
 	name: IconsAvailable;
 	animate?: string; // Try to make a class in `keyframes.scss` instead of using this prop
 	ref?: Ref<SVGSVGElement>;

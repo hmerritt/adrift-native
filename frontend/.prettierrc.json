@@ -6,9 +6,13 @@
 	"trailingComma": "none",
 	"endOfLine": "lf",
 	"plugins": ["@trivago/prettier-plugin-sort-imports"],
+	"validImports": ["@stylexjs/stylex", "stylex"],
 	"importOrder": [
 		"<THIRD_PARTY_MODULES>",
-		"^(lib|locale|state|tests|types)/(.*)$",
+		"^lib/(.*)$",
+		"^state/(.*)$",
+		"^tests/(.*)$",
+		"^types/(.*)$",
 		"^view/(.*)$",
 		"^[./](.*)$"
 	],

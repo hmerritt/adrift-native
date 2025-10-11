@@ -14,23 +14,25 @@ import { injectDevTools } from "./devTools";
 import { injectEnv } from "./env";
 import { injectFeature } from "./featureFlags";
 import { injectLog } from "./log";
-import { injectSafeAwait } from "./utils";
+import { injectGo } from "./utils";
 import { versionString } from "./version";
 
 export const globalInit = () => {
 	// Inject global functions.
-	injectSafeAwait();
+	injectGo();
 	injectEnv();
 	injectLog();
 	injectFeature();
 
 	// Log app name+version. Hide for tests to reduce clutter in console.
-	if (!env.isTesting) {
+	if (!env.isTest) {
+		// eslint-disable-next-line no-console
 		console.log(`%c${versionString()}`, "font-size: 1.1em;padding: 1rem 0;");
 	}
 
-	if (env.isDevelopment) {
+	if (env.isDev) {
 		injectDevTools();
+		// eslint-disable-next-line no-console
 		console.log("env", env);
 	}
 };

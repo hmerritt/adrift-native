@@ -30,7 +30,7 @@ export const parseJSON = (value: string | null): any | undefined => {
 	try {
 		return value === "undefined" ? undefined : JSON.parse(value ?? "");
 	} catch {
-		log("warn", value);
+		logn.warn("parseJSON", value);
 		return undefined;
 	}
 };
