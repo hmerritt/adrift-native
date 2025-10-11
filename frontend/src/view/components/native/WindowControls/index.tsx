@@ -24,7 +24,7 @@ export const WindowControls: FC<WindowControlsProps> = ({
 }) => {
 	return (
 		// @TODO Icons - separate icons for mac and windows?
-		<div {...stylex.props(styles.controls)}>
+		<div {...stylex.props(styles.drag, styles.controls)}>
 			{onClose && (
 				<Ripple
 					sx={[styles.controlMac, styles.controlMacClose]}
@@ -53,7 +53,34 @@ export const WindowControls: FC<WindowControlsProps> = ({
 	);
 };
 
+/**
+ * An area that can be used to drag the window around.
+ */
+export const WindowDragArea = () => {
+	return <div {...stylex.props(styles.drag, styles.dragArea)} />;
+};
+
 const styles = stylex.create({
+	drag: {
+		// eslint-disable-next-line @stylexjs/valid-styles
+		"--runtime-draggable": "drag"
+	},
+	dragArea: {
+		position: "fixed",
+		top: 0,
+		left: 0,
+		right: 0,
+		height: "2.5rem",
+		zIndex: 99999
+	},
+	controls: {
+		alignItems: "center",
+		display: "flex",
+		flexDirection: "row",
+		gap: "1rem",
+		justifyContent: "center",
+		position: "relative"
+	},
 	controlMac: {
 		alignItems: "center",
 		borderRadius: "100%",
@@ -92,15 +119,5 @@ const styles = stylex.create({
 		},
 		transition: "opacity 150ms ease-in-out",
 		width: "1.1rem"
-	},
-	controls: {
-		// eslint-disable-next-line @stylexjs/valid-styles
-		"--runtime-draggable": "drag",
-		alignItems: "center",
-		display: "flex",
-		flexDirection: "row",
-		gap: "1rem",
-		justifyContent: "center",
-		position: "relative"
 	}
 });

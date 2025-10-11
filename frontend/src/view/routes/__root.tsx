@@ -10,7 +10,7 @@ import { colors } from "lib/styles/colors.stylex";
 import { shadowFn } from "lib/styles/shadows.stylex";
 
 import { DotGrid, FrostedGlass, Icon, Stack } from "view/components";
-import { WindowControls } from "view/components/native";
+import { WindowControls, WindowDragArea } from "view/components/native";
 
 /**
  * `@tanstack/react-router` file-based routing.
@@ -39,6 +39,7 @@ function RootRoute() {
 					onMaximize={() => (window as any)?.runtime?.WindowToggleMaximise()}
 				/>
 			</div>
+			<WindowDragArea />
 		</>
 	);
 }
@@ -97,7 +98,9 @@ const styles = stylex.create({
 		position: "fixed",
 		top: 0,
 		left: 0,
-		zIndex: 9999,
-		padding: "1.5rem"
+		zIndex: 9999999999,
+		padding: "1.5rem",
+		// eslint-disable-next-line @stylexjs/valid-styles
+		"--runtime-draggable": "drag"
 	}
 });
