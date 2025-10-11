@@ -32,6 +32,7 @@ var Aliases = map[string]interface{}{
 
 // Start development server (opens app window with live reload)
 func Dev() error {
+	mg.Deps(BumpVersion)
 	log := NewLogger()
 	defer log.End()
 	return sh.Run("wails", "dev")
@@ -87,12 +88,15 @@ func (Build) Clean() error {
 
 // Create a debug development build (expect the output filesize to be much bigger)
 func (Build) Debug() error {
+	mg.Deps(BumpVersion)
 	log := NewLogger()
 	defer log.End()
 	log.Info("compiling debug binary")
 	return sh.Run(
 		"wails",
 		"build",
+		"-ldflags",
+		LdFlagString(true),
 		"-trimpath",
 		"-race",
 		"-debug",
@@ -101,7 +105,7 @@ func (Build) Debug() error {
 
 // Create a release build
 func (Build) Release() error {
-	mg.Deps(Build.Clean, BumpVersion)
+	mg.Deps(Build.Clean)
 	log := NewLogger()
 	defer log.End()
 	log.Info("compiling release binary")
@@ -114,8 +118,9 @@ func (Build) Release() error {
 		APP_NAME,
 		"-trimpath",
 		// "-nsis", // Builds a Windows installer
-		"-upx", // Binary compression
-		"-upxflags", "--best",
+		// @TODO: Breaks on MacOS?
+		// "-upx", // Binary compression
+		// "-upxflags", "--best",
 	)
 }
 

@@ -14,5 +14,5 @@ var (
 	VersionPrerelease string
 	VersionMetadata   string
 
-	Version = "0.1.107"
+	Version = "0.1.109"
 )
