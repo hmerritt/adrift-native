@@ -3,12 +3,12 @@ name: App test
 on:
     push:
         tags-ignore:
-            - '[0-9]+.[0-9]+.[0-9]+'
+            - "[0-9]+.[0-9]+.[0-9]+"
         branches:
-            - '**'
+            - "**"
     pull_request:
         branches:
-            - '*'
+            - "*"
 
 # env:
 #     MATRIX_OS: ubuntu-latest windows-latest macos-latest

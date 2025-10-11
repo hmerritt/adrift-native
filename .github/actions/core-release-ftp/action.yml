@@ -1,28 +1,28 @@
-name: 'Upload Release Binaries to FTP'
-description: 'Uploads release binaries to an FTP server'
+name: "Upload Release Binaries to FTP"
+description: "Uploads release binaries to an FTP server"
 
 inputs:
     ftp_host:
-        description: 'FTP server hostname or IP address'
+        description: "FTP server hostname or IP address"
         required: true
     ftp_username:
-        description: 'FTP username'
+        description: "FTP username"
         required: true
     ftp_password:
-        description: 'FTP password'
+        description: "FTP password"
         required: true
     ftp_path:
-        description: 'FTP remote directory path'
+        description: "FTP remote directory path"
         required: true
     local_path:
-        description: 'Local directory path containing release binaries'
+        description: "Local directory path containing release binaries"
         required: true
     release_version:
-        description: 'Version number for release. For example: 1.2.123'
+        description: "Version number for release. For example: 1.2.123"
         required: true
 
 runs:
-    using: 'composite'
+    using: "composite"
     steps:
         - name: Upload release binaries to FTP server
           shell: bash

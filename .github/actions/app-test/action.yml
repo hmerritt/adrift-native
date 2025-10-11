@@ -2,7 +2,7 @@ name: App test
 description: Run both Go and frontend tests.
 
 runs:
-    using: 'composite'
+    using: "composite"
     steps:
         - name: Test frontend
           shell: bash

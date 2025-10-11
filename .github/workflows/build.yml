@@ -3,7 +3,7 @@ name: App build
 on:
     push:
         tags:
-            - '[0-9]+.[0-9]+.[0-9]+'
+            - "[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
     test:
@@ -82,10 +82,10 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - name: Setup Go 1.22.0
+            - name: Setup Go 1.25.1
               uses: actions/setup-go@v5
               with:
-                  go-version: '1.22.0'
+                  go-version: "1.25.1"
 
             - name: Setup app Go
               shell: bash
