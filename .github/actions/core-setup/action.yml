@@ -53,3 +53,4 @@ runs:
           run: |
               go install github.com/magefile/mage
               mage -v bootstrap
+              wails doctor
