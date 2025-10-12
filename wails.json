@@ -1,19 +1,33 @@
 {
-    "name": "Adrift Native",
-    "outputfilename": "adrift-native",
-    "frontend:install": "yarn install",
-    "frontend:build": "yarn build",
-    "frontend:dev:watcher": "yarn dev",
-    "frontend:dev:serverUrl": "auto",
-    "author": {
-        "name": "Harry Merritt",
-        "email": "harry@mrrtt.me"
-    },
-    "info": {
-        "companyName": "",
-        "productName": "Adrift Native",
-        "productVersion": "0.1.0",
-        "copyright": "",
-        "comments": ""
-    }
+	"name": "Adrift Native",
+	"outputfilename": "adrift-native",
+	"frontend:install": "yarn install",
+	"frontend:build": "yarn build",
+	"frontend:dev:watcher": "yarn dev",
+	"frontend:dev:serverUrl": "auto",
+	"author": {
+		"name": "Harry Merritt",
+		"email": "harry@mrrtt.me"
+	},
+	"info": {
+		"companyName": "",
+		"productName": "Adrift Native",
+		"productVersion": "0.1.0",
+		"copyright": "",
+		"comments": "",
+		"protocols": [
+			{
+				"scheme": "adrift-native",
+				"description": "Myapp protocol",
+				"role": "Editor"
+			}
+		]
+	},
+	"bindings": {
+		"ts_generation": {
+			"prefix": "",
+			"suffix": "",
+			"outputType": "interfaces"
+		}
+	}
 }

@@ -13,7 +13,7 @@
 		"moduleResolution": "bundler",
 		"noEmit": true,
 		"paths": {
-			"app/go": ["../wailsjs/go/main/App.js"],
+			"app/go/*": ["../wailsjs/go/main/*"],
 			"app/runtime": ["../wailsjs/runtime/runtime.js"]
 		},
 		"resolveJsonModule": true,
@@ -21,7 +21,7 @@
 		"sourceMap": true,
 		"strict": true,
 		"target": "ESNext",
-		"typeRoots": ["./node_modules/@types", "src/lib/global", "./src/types"],
+		"typeRoots": ["./node_modules/@types", "src/lib/global", "src/types"],
 		"useDefineForClassFields": true
 	},
 	"include": [
