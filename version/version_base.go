@@ -2,6 +2,8 @@ package version
 
 const AppName = "adrift-native"
 
+const AppTitle = "Adrift Native"
+
 var (
 	// The compilation date. This will be filled in by the compiler.
 	BuildDate string
@@ -14,5 +16,5 @@ var (
 	VersionPrerelease string
 	VersionMetadata   string
 
-	Version = "0.1.118"
+	Version = "0.1.120"
 )

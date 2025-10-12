@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 
+	"github.com/hmerritt/adrift-native/version"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -24,7 +25,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:             "Adrift Native",
+		Title:             version.AppTitle,
 		Width:             1024,
 		Height:            768,
 		MinWidth:          360,
@@ -38,26 +39,39 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		Menu:             nil,
-		Logger:           nil,
-		LogLevel:         logger.DEBUG,
-		OnStartup:        app.startup,
-		OnDomReady:       app.domReady,
-		OnBeforeClose:    app.beforeClose,
-		OnShutdown:       app.shutdown,
-		WindowStartState: options.Normal,
-		CSSDragProperty:  "--runtime-draggable",
-		CSSDragValue:     "drag",
+		Menu:               nil,
+		Logger:             nil,
+		LogLevel:           logger.DEBUG,
+		LogLevelProduction: logger.ERROR,
+		OnStartup:          app.startup,
+		OnDomReady:         app.domReady,
+		OnBeforeClose:      app.beforeClose,
+		OnShutdown:         app.shutdown,
+		WindowStartState:   options.Normal,
+		CSSDragProperty:    "--runtime-draggable",
+		CSSDragValue:       "drag",
+		DragAndDrop: &options.DragAndDrop{
+			EnableFileDrop:     false,
+			DisableWebViewDrop: false,
+			CSSDropProperty:    "--runtime-drop-target",
+			CSSDropValue:       "drop",
+		},
+		EnableDefaultContextMenu:         false,
+		EnableFraudulentWebsiteDetection: false,
 		Bind: []interface{}{
 			app,
 		},
+		EnumBind: []interface{}{},
 		// Windows platform specific options
 		Windows: &windows.Options{
-			WebviewIsTransparent: false,
-			WindowIsTranslucent:  false,
-			DisableWindowIcon:    false,
-			IsZoomControlEnabled: true,
-			ZoomFactor:           1,
+			WebviewIsTransparent:              false,
+			WindowIsTranslucent:               false,
+			DisableWindowIcon:                 false,
+			IsZoomControlEnabled:              true,
+			DisablePinchZoom:                  true,
+			DisableFramelessWindowDecorations: false,
+			ZoomFactor:                        1,
+			Theme:                             windows.SystemDefault,
 		},
 		Mac: &mac.Options{
 			TitleBar: &mac.TitleBar{
@@ -72,7 +86,7 @@ func main() {
 			WebviewIsTransparent: false,
 			WindowIsTranslucent:  false,
 			About: &mac.AboutInfo{
-				Title:   "Adrift Native",
+				Title:   version.AppTitle,
 				Message: "",
 				Icon:    icon,
 			},
@@ -80,6 +94,8 @@ func main() {
 		Linux: &linux.Options{
 			Icon:                icon,
 			WindowIsTranslucent: false,
+			WebviewGpuPolicy:    linux.WebviewGpuPolicyOnDemand,
+			ProgramName:         version.AppTitle,
 		},
 	})
 
