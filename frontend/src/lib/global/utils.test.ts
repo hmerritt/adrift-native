@@ -258,12 +258,12 @@ describe("parseEnv", () => {
 	});
 });
 
-describe("go", () => {
+describe("run", () => {
 	it("should return [result, null] when the input promise resolves", async () => {
 		const expectedResult = "Success Data";
 		const inputPromise = Promise.resolve(expectedResult);
 
-		const [result, error] = await go(inputPromise);
+		const [result, error] = await run(inputPromise);
 
 		expect(result).toBe(expectedResult);
 		expect(error).toBeNull();
@@ -273,7 +273,7 @@ describe("go", () => {
 		const expectedResult = { id: 1, value: "Test Object" };
 		const promiseFn = vi.fn(() => Promise.resolve(expectedResult));
 
-		const [result, error] = await go(promiseFn);
+		const [result, error] = await run(promiseFn);
 
 		expect(result).toEqual(expectedResult);
 		expect(error).toBeNull();
@@ -287,7 +287,7 @@ describe("go", () => {
 			throw err;
 		});
 
-		const [result, error] = await go(inputPromise);
+		const [result, error] = await run(inputPromise);
 
 		expect(result).toBeNull();
 		expect(error).toBe(expectedError);
@@ -302,7 +302,7 @@ describe("go", () => {
 		});
 
 		// Explicitly type the expected error type if it's not the default Error
-		const [result, error] = await go<unknown, string>(inputPromise);
+		const [result, error] = await run<unknown, string>(inputPromise);
 
 		expect(result).toBeNull();
 		expect(error).toBe(expectedError);
@@ -312,7 +312,7 @@ describe("go", () => {
 		const expectedError = new Error("Function failed!");
 		const promiseFn = vi.fn(() => Promise.reject(expectedError));
 
-		const [result, error] = await go(promiseFn);
+		const [result, error] = await run(promiseFn);
 
 		expect(result).toBeNull();
 		expect(error).toBe(expectedError);
@@ -328,7 +328,7 @@ describe("go", () => {
 			// return Promise.resolve('unreachable');
 		});
 
-		const [result, error] = await go(throwingFn);
+		const [result, error] = await run(throwingFn);
 
 		expect(result).toBeNull();
 		expect(error).toBe(expectedError);
@@ -340,7 +340,7 @@ describe("go", () => {
 		const expectedResult = 12345;
 		const inputPromise = Promise.resolve(expectedResult);
 
-		const [result, error] = await go(inputPromise);
+		const [result, error] = await run(inputPromise);
 
 		expect(result).toBe(expectedResult);
 		expect(error).toBeNull();
@@ -358,7 +358,7 @@ describe("go", () => {
 		});
 
 		// Explicitly type the expected error type
-		const [result, error] = await go<unknown, CustomError>(inputPromise);
+		const [result, error] = await run<unknown, CustomError>(inputPromise);
 
 		expect(result).toBeNull();
 		expect(error).toEqual(expectedError);

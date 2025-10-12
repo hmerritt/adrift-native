@@ -6,6 +6,8 @@ import {
 } from "@tanstack/react-router";
 import { lazy } from "react";
 
+import { Quit, WindowMinimise, WindowToggleMaximise } from "app/runtime";
+
 import { colors } from "lib/styles/colors.stylex";
 import { shadowFn } from "lib/styles/shadows.stylex";
 
@@ -32,11 +34,12 @@ function RootRoute() {
 			{/* Router dev tools */}
 			<TanStackRouterDevtools />
 
+			{/* Native controls */}
 			<div {...stylex.props(styles.controlsWrapper)}>
 				<WindowControls
-					onClose={() => (window as any)?.runtime?.Quit()}
-					onMinimize={() => (window as any)?.runtime?.WindowMinimise()}
-					onMaximize={() => (window as any)?.runtime?.WindowToggleMaximise()}
+					onClose={() => Quit()}
+					onMinimize={() => WindowMinimise()}
+					onMaximize={() => WindowToggleMaximise()}
 				/>
 			</div>
 			<WindowDragArea />

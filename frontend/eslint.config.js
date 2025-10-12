@@ -10,6 +10,11 @@ import globals from "globals";
 
 export default [
 	{
+		globals: {
+			document: true,
+			foo: true,
+			window: true
+		},
 		ignores: [
 			".expo-shared",
 			".expo",

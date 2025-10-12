@@ -30,7 +30,7 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
 		return false;
 	}
 
-	const [, error] = await go(async () => {
+	const [, error] = await run(async () => {
 		await navigator.clipboard.writeText(text);
 		return true;
 	});

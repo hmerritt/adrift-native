@@ -49,14 +49,20 @@ export default defineConfig({
 			external: ["solid-js", "solid-js/web"]
 		}
 	},
-	define: {
-		"process.env": {}
-	},
 	css: {
 		preprocessorOptions: {
 			scss: {
 				api: "modern-compiler"
 			}
+		}
+	},
+	define: {
+		"process.env": {}
+	},
+	resolve: {
+		alias: {
+			"app/go": path.resolve(__dirname, "./wailsjs/go/main/App.js"),
+			"app/runtime": path.resolve(__dirname, "./wailsjs/runtime/runtime.js")
 		}
 	},
 	plugins: [

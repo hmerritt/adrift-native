@@ -9,6 +9,7 @@
 	"validImports": ["@stylexjs/stylex", "stylex"],
 	"importOrder": [
 		"<THIRD_PARTY_MODULES>",
+		"^app/(.*)$",
 		"^lib/(.*)$",
 		"^state/(.*)$",
 		"^tests/(.*)$",

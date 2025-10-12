@@ -51,9 +51,9 @@ export const parseEnv = (value: any, isJson = false) => {
 /**
  * Run async task, catching and returning any errors as a variable (similar to Go).
  *
- * @example const [result, error] = await go(myPromise())
+ * @example const [result, error] = await run(myPromise())
  */
-export const go = async <T, E = Error>(
+export const run = async <T, E = Error>(
 	promise: Promise<T> | (() => Promise<T>)
 ): Promise<[T, null] | [T, E]> => {
 	try {
@@ -68,9 +68,9 @@ export const go = async <T, E = Error>(
 /**
  * Run synchronous task, catching and returning any errors as a variable (similar to Go).
  *
- * @example const [result, error] = goSync(() => myFn(...props))
+ * @example const [result, error] = runSync(() => myFn(...props))
  */
-export const goSync = <R, E = Error>(cb: () => R): [R, null] | [R, E] => {
+export const runSync = <R, E = Error>(cb: () => R): [R, null] | [R, E] => {
 	try {
 		const result = cb();
 		return [result, null];
@@ -79,10 +79,10 @@ export const goSync = <R, E = Error>(cb: () => R): [R, null] | [R, E] => {
 	}
 };
 
-export type GoFn = typeof go;
-export type GoSyncFn = typeof goSync;
+export type RunFn = typeof run;
+export type RunSyncFn = typeof runSync;
 
-export const injectGo = () => {
-	setGlobalValue("go", go);
-	setGlobalValue("goSync", goSync);
+export const injectRun = () => {
+	setGlobalValue("run", run);
+	setGlobalValue("runSync", runSync);
 };
